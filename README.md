@@ -6,7 +6,16 @@
 [![codecov](https://codecov.io/gh/marcusvaltonen/DronePoseLib/branch/main/graph/badge.svg)](https://codecov.io/gh/marcusvaltonen/DronePoseLib)
 
 Library for Visual-Inertial Odometry (VIO) using minimal solvers utilizing a common reference
-direction (obtained from IMU data). The code is related to the ArXiV paper (coming soon).
+direction (obtained from IMU data). The code is related to the ArXiV paper [[link](https://arxiv.org/abs/2103.08286)]:
+
+@misc{valtonenornhag-etal-2021-arxiv,
+      title={Trust Your IMU: Consequences of Ignoring the IMU Drift},
+      author={Marcus {Valtonen~Örnhag} and Patrik Persson and Mårten Wadenbäck and Kalle Åström and Anders Heyden},
+      year={2021},
+      eprint={2103.08286},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
 
 ## Dependencies
 The implementation uses Eigen 3 (older versions are not compatible), which is
