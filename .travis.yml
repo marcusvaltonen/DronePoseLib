@@ -1,0 +1,103 @@
+language: cpp
+
+dist: bionic
+
+matrix:
+  include:
+    - os: linux
+      compiler: g++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libeigen3-dev
+            - lcov
+            - g++-7
+    - os: linux
+      compiler: g++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libeigen3-dev
+            - lcov
+            - g++-8
+    - os: linux
+      compiler: g++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libeigen3-dev
+            - lcov
+            - g++-9
+    - os: linux
+      compiler: clang++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-7
+          packages:
+            - libeigen3-dev
+            - lcov
+            - clang-7
+    - os: linux
+      compiler: clang++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-8
+          packages:
+            - libeigen3-dev
+            - lcov
+            - clang-8
+    - os: linux
+      compiler: clang++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-9
+          packages:
+            - libeigen3-dev
+            - lcov
+            - clang-9
+    - os: osx
+      osx_image: xcode10
+    - os: osx
+      osx_image: xcode11
+    - os: osx
+      osx_image: xcode12
+
+addons:
+  homebrew:
+    # update: true
+    packages:
+      - eigen
+      - lcov
+
+install:
+  - pip install cpplint
+
+script:
+  - ./build.sh
+  - cpplint --linelength=119 --verbose=1 --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp --exclude=tests/catch2 --exclude=build --recursive --quiet .
+
+after_success:
+  # From: https://github.com/codecov/example-cpp11-cmake/blob/master/.travis.yml
+  # Create lcov report
+  # capture coverage info
+  - lcov --directory . --capture --output-file coverage.info
+  # filter out system and extra files.
+  # To also not include test code in coverage add them with full path to the patterns: '*/tests/*'
+  - lcov --remove coverage.info '/usr/*' '*tests/catch2/catch.hpp' --output-file coverage.info
+  # output coverage data for debugging (optional)
+  - lcov --list coverage.info
+  # Uploading to CodeCov
+  # '-f' specifies file(s) to use and disables manual coverage gathering and file search which has already been done above
+  - bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
