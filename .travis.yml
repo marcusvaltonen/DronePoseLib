@@ -6,7 +6,9 @@ matrix:
   include:
     - os: linux
       compiler: g++-7
-      env: CXX=g++-7
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
       addons:
         apt:
           sources:
@@ -17,7 +19,9 @@ matrix:
             - g++-7
     - os: linux
       compiler: g++-8
-      env: CXX=g++-8
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
       addons:
         apt:
           sources:
@@ -28,7 +32,9 @@ matrix:
             - g++-8
     - os: linux
       compiler: g++-9
-      env: CXX=g++-9
+      env:
+        - CC=gcc-9
+        - CXX=g++-9
       addons:
         apt:
           sources:
@@ -39,7 +45,9 @@ matrix:
             - g++-9
     - os: linux
       compiler: clang++-7
-      env: CXX=clang++-7
+      env:
+        - CC=clang-7
+        - CXX=clang++-7
       addons:
         apt:
           sources:
@@ -51,7 +59,9 @@ matrix:
             - clang-7
     - os: linux
       compiler: clang++-8
-      env: CXX=clang++-8
+      env:
+        - CC=clang-8
+        - CXX=clang++-8
       addons:
         apt:
           sources:
@@ -63,7 +73,9 @@ matrix:
             - clang-8
     - os: linux
       compiler: clang++-9
-      env: CXX=clang++-9
+      env:
+        - CC=clang-9
+        - CXX=clang++-9
       addons:
         apt:
           sources:
@@ -91,8 +103,6 @@ install:
     fi
 
 script:
-  # Check versions of gcc, g++ and cmake
-  - gcc -v && g++ -v && cmake --version
   - ./build.sh
   - cpplint --linelength=119 --verbose=1 --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp --exclude=tests/catch2 --exclude=build --exclude=src/helpers/quartic.{h,c}pp --filter=-build/include_subdir --recursive --quiet .
 
