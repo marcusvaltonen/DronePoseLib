@@ -5,7 +5,7 @@ dist: bionic
 matrix:
   include:
     - os: linux
-      compiler: g++
+      compiler: g++-7
       addons:
         apt:
           sources:
@@ -15,7 +15,7 @@ matrix:
             - lcov
             - g++-7
     - os: linux
-      compiler: g++
+      compiler: g++-8
       addons:
         apt:
           sources:
@@ -25,7 +25,7 @@ matrix:
             - lcov
             - g++-8
     - os: linux
-      compiler: g++
+      compiler: g++-9
       addons:
         apt:
           sources:
@@ -67,10 +67,6 @@ matrix:
             - libeigen3-dev
             - lcov
             - clang-9
-    - os: osx
-      osx_image: xcode10
-    - os: osx
-      osx_image: xcode11
     - os: osx
       osx_image: xcode12
 
