@@ -5,37 +5,10 @@ dist: bionic
 matrix:
   include:
     - os: linux
-      compiler: g++
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libeigen3-dev
-            - lcov
-            - g++-7
-    - os: linux
-      compiler: g++
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libeigen3-dev
-            - lcov
-            - g++-8
-    - os: linux
-      compiler: g++
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libeigen3-dev
-            - lcov
-            - g++-9
-    - os: linux
-      compiler: clang++
+      compiler: clang++-7
+      env:
+        - CC=clang-7
+        - CXX=clang++-7
       addons:
         apt:
           sources:
@@ -46,7 +19,10 @@ matrix:
             - lcov
             - clang-7
     - os: linux
-      compiler: clang++
+      compiler: clang++-8
+      env:
+        - CC=clang-8
+        - CXX=clang++-8
       addons:
         apt:
           sources:
@@ -57,7 +33,10 @@ matrix:
             - lcov
             - clang-8
     - os: linux
-      compiler: clang++
+      compiler: clang++-9
+      env:
+        - CC=clang-9
+        - CXX=clang++-9
       addons:
         apt:
           sources:
@@ -67,10 +46,6 @@ matrix:
             - libeigen3-dev
             - lcov
             - clang-9
-    - os: osx
-      osx_image: xcode10
-    - os: osx
-      osx_image: xcode11
     - os: osx
       osx_image: xcode12
 
@@ -82,11 +57,15 @@ addons:
       - lcov
 
 install:
-  - pip install cpplint
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        pip3 install cpplint;
+    else
+        pip install cpplint;
+    fi
 
 script:
   - ./build.sh
-  - cpplint --linelength=119 --verbose=1 --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp --exclude=tests/catch2 --exclude=build --recursive --quiet .
+  - cpplint --linelength=119 --verbose=1 --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp --exclude=tests/catch2 --exclude=build --exclude=src/helpers/quartic.{h,c}pp --filter=-build/include_subdir --recursive --quiet .
 
 after_success:
   # From: https://github.com/codecov/example-cpp11-cmake/blob/master/.travis.yml

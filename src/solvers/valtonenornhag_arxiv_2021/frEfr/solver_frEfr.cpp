@@ -18,36 +18,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "solver_frEfr.hpp"
 #include <Eigen/Dense>
-#include "sturm.h"
-#include "charpoly.h"
 #include "coeffs_frEfr.hpp"
 
 namespace DronePoseLib {
 namespace ValtonenOrnhagArxiv2021 {
-Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data)
-{
+Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data) {
     // Compute coefficients
     Eigen::VectorXd coeffs = DronePoseLib::ValtonenOrnhagArxiv2021::coeffs_frEfr(data);
 
     // Setup elimination template
-    static const int coeffs0_ind[] = { 0,15,1,0,15,16,30,45,2,1,16,17,31,46,3,15,0,18,30,45,5,3,18,16,1,20,31,33,48,46,8,18,3,23,33,48,6,21,36,51,4,2,17,19,32,47,6,4,19,21,34,49,9,24,21,6,36,39,54,51 };
-    static const int coeffs1_ind[] = { 7,5,20,17,2,22,32,35,50,47,9,7,22,19,4,24,34,37,52,49,10,8,23,20,5,25,35,38,53,50,11,10,25,22,7,26,37,40,55,52,12,23,8,27,38,53,11,26,24,9,39,41,56,54,13,12,27,25,10,28,40,42,57,55,13,28,26,11,41,43,58,56,14,27,12,29,42,57,14,29,28,13,43,44,59,58,29,14,44,59 };
-    static const int C0_ind[] = { 0,5,10,11,12,15,17,18,20,21,22,25,27,28,30,33,34,35,36,39,40,41,42,43,44,45,46,47,48,49,50,53,54,55,56,59,61,62,67,68,70,71,72,75,77,78,80,81,82,85,87,88,91,92,93,94,96,97,98,99 } ;
-    static const int C1_ind[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,43,44,45,46,49,51,52,53,54,56,57,58,59,60,61,62,63,64,65,66,67,68,69,71,72,73,74,76,77,78,79,80,83,84,85,86,89,91,92,93,94,96,97,98,99,103,104,106,109 };
+    static const int coeffs0_ind[] = {0, 15, 1, 0, 15, 16, 30, 45, 2, 1, 16, 17, 31, 46, 3, 15, 0, 18, 30, 45, 5, 3,
+        18, 16, 1, 20, 31, 33, 48, 46, 8, 18, 3, 23, 33, 48, 6, 21, 36, 51, 4, 2, 17, 19, 32, 47, 6, 4, 19, 21, 34,
+        49, 9, 24, 21, 6, 36, 39, 54, 51};
+    static const int coeffs1_ind[] = {7, 5, 20, 17, 2, 22, 32, 35, 50, 47, 9, 7, 22, 19, 4, 24, 34, 37, 52, 49, 10, 8,
+        23, 20, 5, 25, 35, 38, 53, 50, 11, 10, 25, 22, 7, 26, 37, 40, 55, 52, 12, 23, 8, 27, 38, 53, 11, 26, 24, 9,
+        39, 41, 56, 54, 13, 12, 27, 25, 10, 28, 40, 42, 57, 55, 13, 28, 26, 11, 41, 43, 58, 56, 14, 27, 12, 29, 42,
+        57, 14, 29, 28, 13, 43, 44, 59, 58, 29, 14, 44, 59};
+    static const int C0_ind[] = {0, 5, 10, 11, 12, 15, 17, 18, 20, 21, 22, 25, 27, 28, 30, 33, 34, 35, 36, 39, 40, 41,
+        42, 43, 44, 45, 46, 47, 48, 49, 50, 53, 54, 55, 56, 59, 61, 62, 67, 68, 70, 71, 72, 75, 77, 78, 80, 81, 82, 85,
+        87, 88, 91, 92, 93, 94, 96, 97, 98, 99};
+    static const int C1_ind[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+        24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 46, 49, 51, 52, 53, 54, 56,
+        57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 71, 72, 73, 74, 76, 77, 78, 79, 80, 83, 84, 85, 86, 89, 91,
+        92, 93, 94, 96, 97, 98, 99, 103, 104, 106, 109};
 
-    Eigen::Matrix<double,10,10> C0; C0.setZero();
-    Eigen::Matrix<double,10,11> C1; C1.setZero();
-    for (int i = 0; i < 60; i++) { C0(C0_ind[i]) = coeffs(coeffs0_ind[i]); }
-    for (int i = 0; i < 90; i++) { C1(C1_ind[i]) = coeffs(coeffs1_ind[i]); }
+    Eigen::Matrix<double, 10, 10> C0; C0.setZero();
+    Eigen::Matrix<double, 10, 11> C1; C1.setZero();
+    for (int i = 0; i < 60; i++) {
+        C0(C0_ind[i]) = coeffs(coeffs0_ind[i]);
+    }
+    for (int i = 0; i < 90; i++) {
+        C1(C1_ind[i]) = coeffs(coeffs1_ind[i]);
+    }
 
-    Eigen::Matrix<double,10,11> C12 = C0.partialPivLu().solve(C1);
+    Eigen::Matrix<double, 10, 11> C12 = C0.partialPivLu().solve(C1);
 
     // Setup action matrix
-    Eigen::Matrix<double,14, 11> RR;
-    RR << -C12.bottomRows(3), Eigen::Matrix<double,11,11>::Identity(11, 11);
+    Eigen::Matrix<double, 14, 11> RR;
+    RR << -C12.bottomRows(3), Eigen::Matrix<double, 11, 11>::Identity(11, 11);
 
-    static const int AM_ind[] = { 0,1,3,4,5,2,6,8,9,10,12 };
+    static const int AM_ind[] = {0, 1, 3, 4, 5, 2, 6, 8, 9, 10, 12};
     Eigen::Matrix<double, 11, 11> AM;
     for (int i = 0; i < 11; i++) {
         AM.row(i) = RR.row(AM_ind[i]);

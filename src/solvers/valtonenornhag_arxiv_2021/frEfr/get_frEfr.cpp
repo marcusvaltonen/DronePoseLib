@@ -18,16 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "get_valtonenornhag_arxiv_2021.hpp"
-#include <vector>
-// #include <complex>
 #include <Eigen/Dense>
+#include <vector>
+#include "get_valtonenornhag_arxiv_2021.hpp"
 #include "relpose.hpp"
 #include "radial.hpp"
-// #include <cmath>  // max
-// #include "normalize2dpts.hpp"
 #include "solver_frEfr.hpp"
-//#include "get_E_no_rot.hpp"
 
 namespace DronePoseLib {
 namespace ValtonenOrnhagArxiv2021 {
@@ -37,8 +33,7 @@ namespace ValtonenOrnhagArxiv2021 {
         const Eigen::Matrix3d &R1,
         const Eigen::Matrix3d &R2,
         const Eigen::Matrix2d &x1,
-        const Eigen::Matrix2d &x2
-    );
+        const Eigen::Matrix2d &x2);
 
     std::vector<RelPose> get_frEfr(
         const Eigen::MatrixXd &p1,
@@ -55,7 +50,7 @@ namespace ValtonenOrnhagArxiv2021 {
         assert(p1.cols() == nbr_pts);
         assert(p2.cols() == nbr_pts);
 
-        /* TODO: Add normalization
+        /* FIXME: Add normalization
         // Compute normalization matrix
         double scale1 = normalize2dpts(p1);
         double scale2 = normalize2dpts(p2);
@@ -128,7 +123,7 @@ namespace ValtonenOrnhagArxiv2021 {
         const Eigen::Matrix3d &R2,
         const Eigen::Matrix2d &x1,
         const Eigen::Matrix2d &x2
-    ){
+    ) {
         Eigen::Vector3d fmat;
         fmat << 1.0 / f, 1.0 / f, 1.0;
         Eigen::DiagonalMatrix<double, 3> Kinv = fmat.asDiagonal();
@@ -140,7 +135,6 @@ namespace ValtonenOrnhagArxiv2021 {
 
         // Extract translation
         Eigen::Vector3d t;
-        // TODO: This line I hacked together - unclear if it is correct
         t = R2 * y1.col(0).cross(y2.col(0)).cross(y1.col(1).cross(y2.col(1)));
         return t;
     }

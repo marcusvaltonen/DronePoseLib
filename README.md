@@ -1,6 +1,21 @@
 # DronePoseLib
+
+[![Build Status](https://travis-ci.com/marcusvaltonen/DronePoseLib.svg?branch=main)](https://travis-ci.com/marcusvaltonen/DronePoseLib)
+![GitHub](https://img.shields.io/github/license/marcusvaltonen/DronePoseLib)
+
 Library for Visual-Inertial Odometry (VIO) using minimal solvers utilizing a common reference
-direction (obtained from IMU data). The code is related to the ArXiV paper (coming soon).
+direction (obtained from IMU data). The code is related to the ArXiV paper [[link](https://arxiv.org/abs/2103.08286)]:
+
+```
+@misc{valtonenornhag-etal-2021-arxiv,
+      title={Trust Your IMU: Consequences of Ignoring the IMU Drift},
+      author={Marcus {Valtonen~Örnhag} and Patrik Persson and Mårten Wadenbäck and Kalle Åström and Anders Heyden},
+      year={2021},
+      eprint={2103.08286},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
 
 ## Dependencies
 The implementation uses Eigen 3 (older versions are not compatible), which is
@@ -12,7 +27,13 @@ Installation for Ubuntu/Debian:
 ```bash
     $ apt-get install libeigen3-dev
 ```
-Tested on version 3.3.4.
+The source code has been compiled and tested on Ubuntu 18.04 (Bionic Beaver) with clang++-7 to clang++-9.
+Furthermore, it is tested on OSX with Xcode 12.
+
+### Compiling with g++
+It is possible to compile it using g++ (tested on version 7.5.0) but requires more
+memory (tested succesfully with 16 GB internal memory).
+We are working on reducing the memory footprint.
 
 ## Using the solver in MATLAB
 It is possible to MEX-compile the solver and use it in MATLAB.
