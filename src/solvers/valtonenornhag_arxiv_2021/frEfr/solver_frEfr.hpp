@@ -25,7 +25,7 @@
 
 namespace DronePoseLib {
 namespace ValtonenOrnhagArxiv2021 {
-Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data);
+Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data, const bool use_fast_solver);
 }  // namespace ValtonenOrnhagArxiv2021
 }  // namespace DronePoseLib
 
