@@ -1,4 +1,10 @@
 # DronePoseLib
+
+[![Build Status](https://travis-ci.com/marcusvaltonen/DronePoseLib.svg?branch=main)](https://travis-ci.com/marcusvaltonen/DronePoseLib)
+![GitHub](https://img.shields.io/github/license/marcusvaltonen/DronePoseLib)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/marcusvaltonen/DronePoseLib.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcusvaltonen/DronePoseLib/context:cpp)
+[![codecov](https://codecov.io/gh/marcusvaltonen/DronePoseLib/branch/main/graph/badge.svg)](https://codecov.io/gh/marcusvaltonen/DronePoseLib)
+
 Library for Visual-Inertial Odometry (VIO) using minimal solvers utilizing a common reference
 direction (obtained from IMU data). The code is related to the ArXiV paper (coming soon).
 
