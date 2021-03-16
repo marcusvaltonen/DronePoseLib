@@ -82,7 +82,7 @@ install:
 
 script:
   - ./build.sh
-  - cpplint --linelength=119 --verbose=1 --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp --exclude=tests/catch2 --exclude=build --recursive --quiet .
+  - cpplint --linelength=119 --verbose=1 --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp --exclude=tests/catch2 --exclude=build --exclude=src/helpers/quartic.{h,c}pp --filter=-build/include_subdir --recursive --quiet .
 
 after_success:
   # From: https://github.com/codecov/example-cpp11-cmake/blob/master/.travis.yml
