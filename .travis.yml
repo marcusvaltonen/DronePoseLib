@@ -84,7 +84,11 @@ addons:
       - lcov
 
 install:
-  - pip3 install cpplint
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        pip3 install cpplint
+    else
+        pip install cpplint
+    fi
 
 script:
   # Check versions of gcc, g++ and cmake
