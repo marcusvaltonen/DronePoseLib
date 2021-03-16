@@ -85,9 +85,9 @@ addons:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        pip3 install cpplint
+        pip3 install cpplint;
     else
-        pip install cpplint
+        pip install cpplint;
     fi
 
 script:
