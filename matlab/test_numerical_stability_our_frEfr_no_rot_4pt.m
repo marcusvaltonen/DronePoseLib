@@ -1,7 +1,7 @@
 addpath('helpers')
 addpath(genpath('solvers'))
 
-nbr_iter = 1e3;
+nbr_iter = 1e4;
 error_f = zeros(nbr_iter,1);
 error_F = zeros(nbr_iter,1);
 error_r = zeros(nbr_iter,1);
@@ -10,35 +10,18 @@ error_r = zeros(nbr_iter,1);
 N = 4;
 
 for j = 1:nbr_iter
+    if mod(j, 500) == 0
+        fprintf(1, 'Iter: %d\n', j)
+    end
     % Generate random problem instance
     r = -rand * (1 - 1e-6);
-    [R1, R2, ~, f, F, x1, x2] = generate_points(N, 0, r);
+    [R1, R2, ~, f, F, x1, x2, R, t, x1u, x2u] = generate_points_realistic(N, 0, r);
 
-    % Solve the problem
-    out = get_frEfr_no_rot_wrapper(x1(1:2,:), x2(1:2,:), R1, R2);
+    % Solve problem
+    out = get_frEfr_no_rot_wrapper(x1u(1:2,:), x2u(1:2,:), R1, R2);
 
     % Compare to ground truth
-    tmp1 = [];
-    tmp2 = [];
-    tmp3 = [];
-
-    % Normalize GT
-    F = F / F(3, 3);
-    
-    for k = 1:length(out)
-        f_est = out(k).f;
-        tmp1(k) = abs(f_est - f) / f;
-        r_est = out(k).r;
-        tmp2(k) = abs(r_est - r) / abs(r);
-        F_est = out(k).F / out(k).F(3, 3);
-        tmp4(k) = norm(F_est - F) / norm(F);
-    end
-
-    
-    % Compute errors
-    error_f(j) = min(tmp1);
-    error_r(j) = min(tmp2);
-    error_F(j) = min(tmp4);
+    [error_f(j), error_F(j), error_r(j)] = compare_to_gt(out, f, F, r);
 end
 
 %% Plot histogram
