@@ -16,8 +16,6 @@ for i = 1:nbr_noise_levels
     disp(['Noise level: ', num2str(i)])
     noise = noise_levels(i);
     for j = 1:nbr_iter
-        disp(['    Iter: ', num2str(j)])
-
         % Add noise on R1 and R2.
         R1noise = eul2rotm(deg2rad(0.1 * noise * randn(1, 3)), 'XYZ');
         R2noise = eul2rotm(deg2rad(0.1 * noise * randn(1, 3)), 'XYZ');
