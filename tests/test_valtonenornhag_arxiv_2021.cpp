@@ -113,14 +113,14 @@ TEST_CASE("Valtonen Ornhag Arxiv 2021 - frEfr") {
 
     // Test focal length
     REQUIRE(poses[0].f == Approx(-125306.614892352).margin(tol));
-    REQUIRE(poses[1].f == Approx( -4414.6281332681).margin(tol));
-    REQUIRE(poses[2].f == Approx( 2445.47041951124).margin(tol));
-    REQUIRE(poses[3].f == Approx( 2291.31342291246).margin(tol));
+    REQUIRE(poses[1].f == Approx(-4414.62813326810).margin(tol));
+    REQUIRE(poses[2].f == Approx(2445.470419511240).margin(tol));
+    REQUIRE(poses[3].f == Approx(2291.313422912460).margin(tol));
     REQUIRE(poses[4].f == Approx(-75.4204581489593).margin(tol));
-    REQUIRE(poses[5].f == Approx( 1081.28069555953).margin(tol));
-    REQUIRE(poses[6].f == Approx( 7.14206918681348).margin(tol));
-    REQUIRE(poses[7].f == Approx( 96.4206434537398).margin(tol));
-    REQUIRE(poses[8].f == Approx( 944.970619870485).margin(tol));
+    REQUIRE(poses[5].f == Approx(1081.280695559530).margin(tol));
+    REQUIRE(poses[6].f == Approx(7.142069186813480).margin(tol));
+    REQUIRE(poses[7].f == Approx(96.42064345373980).margin(tol));
+    REQUIRE(poses[8].f == Approx(944.9706198704850).margin(tol));
 
     // Test fundamental matrix
     tol = 1e-7;
