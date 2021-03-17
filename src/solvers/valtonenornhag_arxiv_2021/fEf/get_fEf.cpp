@@ -90,6 +90,9 @@ namespace ValtonenOrnhagArxiv2021 {
         std::vector<RelPose> output;
         RelPose relpose;
         Eigen::Matrix3d Q;
+        Eigen::Vector3d kinv;
+        Eigen::DiagonalMatrix<double, 3> Kinv;
+        Eigen::Matrix3d skew_t;
 
         // Householder is just 500 ns slower than analytic, but is significantly more stable
         for (int i=0; i < w.size(); i++) {
@@ -99,6 +102,15 @@ namespace ValtonenOrnhagArxiv2021 {
                 Q = qr.householderQ();
                 relpose.t = Q.col(2);
                 relpose.f = std::real(w[i]);
+
+                // Compute fundamental matrix
+                kinv << 1.0 / relpose.f, 1.0 / relpose.f, 1.0;
+                Kinv = kinv.asDiagonal();
+                skew_t << 0, -relpose.t(2), relpose.t(1),
+                          relpose.t(2), 0, -relpose.t(0),
+                         -relpose.t(1), relpose.t(0), 0;
+                relpose.F = Kinv * skew_t * R * Kinv;
+
                 output.push_back(relpose);
             }
         }
