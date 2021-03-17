@@ -90,5 +90,5 @@ Eigen::VectorXd coeffs_frEfr(const Eigen::VectorXd &data)
 
     return coeffs;
 }
-}  // ValtonenOrnhagArxiv2020C
+}  // ValtonenOrnhagArxiv2021
 }  // DronePoseLib
