@@ -39,3 +39,6 @@ build
 *.mex*
 *.dat
 *.mat
+
+# Ignore coverage report
+coverage.info
