@@ -10,10 +10,10 @@ N = 3;
 
 for j = 1:nbr_iter
     % Generate random problem instance
-    [R1, R2, Ry, f, F, x1, x2, R, t, x1u, x2u] = generate_points(N, 0, 0);
+    [R1, R2, Ry, f, F, x1, x2, R, t, x1u, x2u] = generate_points_realistic(N, 0, 0);
     
     % Solve the problem
-    out = get_fEf_no_rot_wrapper(x1(1:2,:), x2(1:2,:), R1, R2);
+    out = get_valtonenornhag_arxiv_2021_fEf_mex(x1(1:2,:), x2(1:2,:), R1, R2);
     
     % Compare to ground truth
     [error_f(j), error_F(j)] = compare_to_gt(out, f, F);

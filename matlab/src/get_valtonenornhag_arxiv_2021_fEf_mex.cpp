@@ -65,20 +65,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     Eigen::VectorXd R2_tmp = Eigen::Map<Eigen::VectorXd>(mxGetPr(prhs[3]), 9);
     Eigen::MatrixXd R1 = Eigen::Map<Eigen::MatrixXd>(R1_tmp.data(), 3, 3);
     Eigen::MatrixXd R2 = Eigen::Map<Eigen::MatrixXd>(R2_tmp.data(), 3, 3);
+
     // Compute output
     std::vector<DronePoseLib::RelPose> posedata = DronePoseLib::ValtonenOrnhagArxiv2021::get_fEf(x1, x2, R1, R2);
 
     // Wrap it up to Matlab compatible output
     std::size_t NUMBER_OF_STRUCTS = posedata.size();
-    const char *field_names[] = {"t", "f"};
+    const char *field_names[] = {"t", "f", "F"};
     mwSize dims[2] = {1, NUMBER_OF_STRUCTS };
-    int t_field, f_field;
+    int t_field, f_field, F_field;
     mwIndex i;
 
     plhs[0] = mxCreateStructArray(2, dims, NUMBER_OF_FIELDS, field_names);
 
     t_field = mxGetFieldNumber(plhs[0], "t");
     f_field = mxGetFieldNumber(plhs[0], "f");
+    F_field = mxGetFieldNumber(plhs[0], "F");
 
     double* zr;
     for (i = 0; i < NUMBER_OF_STRUCTS; i++) {
@@ -97,6 +99,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         zr = mxGetPr(field_value);
         zr[0] = posedata[i].f;
         mxSetFieldByNumber(plhs[0], i, f_field, field_value);
+
+        // Create F
+        field_value = mxCreateDoubleMatrix(3, 3, mxREAL);
+        zr = mxGetPr(field_value);
+        for (Eigen::Index j = 0; j < 9; j++) {
+            zr[j] = posedata[i].F(j);
+        }
+        mxSetFieldByNumber(plhs[0], i, F_field, field_value);
     }
 }
 #endif  // MATLAB_MEX_FILE

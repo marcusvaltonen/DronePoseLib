@@ -79,7 +79,6 @@ namespace ValtonenOrnhagArxiv2021 {
             coeffs(3) / coeffs(0),
             coeffs(4) / coeffs(0));
 
-
         // Construct putative output
         double thresh = 1e-12;
         Eigen::Matrix3d M;
