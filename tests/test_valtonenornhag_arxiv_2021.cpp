@@ -22,9 +22,6 @@
 #include <catch2/catch.hpp>
 #include "get_valtonenornhag_arxiv_2021.hpp"
 #include "relpose.hpp"
-#include <iostream>
-
-using namespace std;
 
 TEST_CASE("Valtonen Ornhag Arxiv 2021 - fEf") {
     Eigen::MatrixXd p1(2, 3);
@@ -131,6 +128,10 @@ TEST_CASE("Valtonen Ornhag Arxiv 2021 - frEfr") {
     tol = 1e-7;
     Eigen::Matrix3d expected;
 
+    // Normalize putative fundamental matrices
+    for (int i=0; i < poses.size(); i++) {
+        poses[i].F = poses[i].F / poses[i].F(2, 2);
+    }
     expected <<  5.35131001034994e-08,  -5.7529277053108e-08,   0.00216028225738321,
                  5.83836219166296e-08,  5.08573881767033e-08,  -0.00340282135730397,
                   0.00295065385199521, -0.000842021230961776,                     1;
