@@ -28,21 +28,25 @@ for i = 1:nbr_noise_levels
         R1 = R1_orig * R1noise;
         R2 = R2_orig * R2noise;
         
-        % Add noise to image points (add pixel noise)
+        % Add noise to rectified image points
         p1 = [x1(1:2, :) + f/1080*randn(2, N); ones(1, N)];
         p2 = [x2(1:2, :) + f/1080*randn(2, N); ones(1, N)];
         
         % Our method fEf (3 pt)
         try
-            out = get_fEf_no_rot_wrapper(p1(1:2, 1:3), p2(1:2, 1:3), R1, R2);
+            out = get_valtonenornhag_arxiv_2021_fEf_mex(p1(1:2, 1:3), p2(1:2, 1:3), R1, R2);
             [error_f_3pt(i,j), error_F_3pt(i,j)] = compare_to_gt(out, f, F);
         catch
             warning('3pt failed')
         end
+
+        % Add noise to unrectified image points
+        p1 = [x1u(1:2, :) + f/1080*randn(2, N); ones(1, N)];
+        p2 = [x2u(1:2, :) + f/1080*randn(2, N); ones(1, N)];
         
         % Our method frEfr (4 pt)
         try
-            out = get_frEfr_no_rot_wrapper(p1(1:2, 1:4), p2(1:2, 1:4), R1, R2);
+           [error_f_3pt(i,j), error_F_3pt(i,j)] = compare_to_gt(out, f, F);
             [error_f_4pt(i,j), error_F_4pt(i,j)] = compare_to_gt(out, f, F);
         catch
             warning('4pt failed')
