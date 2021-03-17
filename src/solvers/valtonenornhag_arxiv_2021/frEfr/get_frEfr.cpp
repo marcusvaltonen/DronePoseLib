@@ -20,9 +20,11 @@
 
 #include <Eigen/Dense>
 #include <vector>
+#include <algorithm>
 #include "get_valtonenornhag_arxiv_2021.hpp"
-#include "relpose.hpp"
+#include "normalize2dpts.hpp"
 #include "radial.hpp"
+#include "relpose.hpp"
 #include "solver_frEfr.hpp"
 
 namespace DronePoseLib {
@@ -50,7 +52,6 @@ namespace ValtonenOrnhagArxiv2021 {
         assert(p1.cols() == nbr_pts);
         assert(p2.cols() == nbr_pts);
 
-        /* FIXME: Add normalization
         // Compute normalization matrix
         double scale1 = normalize2dpts(p1);
         double scale2 = normalize2dpts(p2);
@@ -58,17 +59,14 @@ namespace ValtonenOrnhagArxiv2021 {
         Eigen::Vector3d s;
         s << scale, scale, 1.0;
         Eigen::DiagonalMatrix<double, 3> S = s.asDiagonal();
-        */
 
         // Normalize data
         Eigen::Matrix<double, 3, nbr_pts> x1;
         Eigen::Matrix<double, 3, nbr_pts> x2;
         x1 = p1.colwise().homogeneous();
         x2 = p2.colwise().homogeneous();
-        /*
-            x1 = S * x1;
-            x2 = S * x2;
-        */
+        x1 = S * x1;
+        x2 = S * x2;
 
         Eigen::Matrix<double, 2, nbr_pts> x1t;
         Eigen::Matrix<double, 2, nbr_pts> x2t;
@@ -98,6 +96,9 @@ namespace ValtonenOrnhagArxiv2021 {
         std::vector<RelPose> output;
         RelPose relpose;
         double f, r;
+        Eigen::Vector3d kinv;
+        Eigen::DiagonalMatrix<double, 3> Kinv;
+        Eigen::Matrix3d skew_t;
 
         // Loop over real solutions
         for (int i=0; i < real_sols.size(); i++) {
@@ -107,8 +108,18 @@ namespace ValtonenOrnhagArxiv2021 {
 
                 // Extract translation
                 relpose.t = extract_translation(f, r, R1, R2, x1t.leftCols<2>(), x2t.leftCols<2>());
-                relpose.f = f;
-                relpose.r = r;
+                relpose.f = f / scale;
+                relpose.r = r / std::pow(scale, 2);
+
+                // Compute fundamental matrix
+                kinv << 1.0 / relpose.f, 1.0 / relpose.f, 1.0;
+                Kinv = kinv.asDiagonal();
+                skew_t << 0, -relpose.t(2), relpose.t(1),
+                          relpose.t(2), 0, -relpose.t(0),
+                         -relpose.t(1), relpose.t(0), 0;
+                relpose.F = Kinv * skew_t * R * Kinv;
+
+                // Add
                 output.push_back(relpose);
             }
         }

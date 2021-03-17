@@ -71,9 +71,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
     // Wrap it up to Matlab compatible output
     std::size_t NUMBER_OF_STRUCTS = posedata.size();
-    const char *field_names[] = {"t", "f", "r"};
+    const char *field_names[] = {"t", "f", "r", "F"};
     mwSize dims[2] = {1, NUMBER_OF_STRUCTS };
-    int t_field, f_field, r_field;
+    int t_field, f_field, r_field, F_field;
     mwIndex i;
 
     plhs[0] = mxCreateStructArray(2, dims, NUMBER_OF_FIELDS, field_names);
@@ -81,6 +81,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     t_field = mxGetFieldNumber(plhs[0], "t");
     f_field = mxGetFieldNumber(plhs[0], "f");
     r_field = mxGetFieldNumber(plhs[0], "r");
+    F_field = mxGetFieldNumber(plhs[0], "F");
 
     double* zr;
     for (i = 0; i < NUMBER_OF_STRUCTS; i++) {
@@ -105,6 +106,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         zr = mxGetPr(field_value);
         zr[0] = posedata[i].r;
         mxSetFieldByNumber(plhs[0], i, r_field, field_value);
+
+        // Create F
+        field_value = mxCreateDoubleMatrix(3, 3, mxREAL);
+        zr = mxGetPr(field_value);
+        for (Eigen::Index j = 0; j < 9; j++) {
+            zr[j] = posedata[i].F(j);
+        }
+        mxSetFieldByNumber(plhs[0], i, F_field, field_value);
     }
 }
 #endif  // MATLAB_MEX_FILE

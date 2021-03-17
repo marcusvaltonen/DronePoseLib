@@ -47,7 +47,6 @@ namespace ValtonenOrnhagArxiv2021 {
         assert(p1.cols() == nbr_pts);
         assert(p2.cols() == nbr_pts);
 
-        /* TODO: Add normailzation
         // Compute normalization matrix
         double scale1 = normalize2dpts(p1);
         double scale2 = normalize2dpts(p2);
@@ -55,17 +54,14 @@ namespace ValtonenOrnhagArxiv2021 {
         Eigen::Vector3d s;
         s << scale, scale, 1.0;
         Eigen::DiagonalMatrix<double, 3> S = s.asDiagonal();
-        */
 
         // Normalize data
         Eigen::Matrix3d x1;
         Eigen::Matrix3d x2;
         x1 = p1.colwise().homogeneous();
         x2 = p2.colwise().homogeneous();
-        /*
-            x1 = S * x1;
-            x2 = S * x2;
-        */
+        x1 = S * x1;
+        x2 = S * x2;
 
         // Compute relative rotation
         Eigen::Matrix3d R = R2 * R1.transpose();
@@ -83,13 +79,15 @@ namespace ValtonenOrnhagArxiv2021 {
             coeffs(3) / coeffs(0),
             coeffs(4) / coeffs(0));
 
-
         // Construct putative output
         double thresh = 1e-12;
         Eigen::Matrix3d M;
         std::vector<RelPose> output;
         RelPose relpose;
         Eigen::Matrix3d Q;
+        Eigen::Vector3d kinv;
+        Eigen::DiagonalMatrix<double, 3> Kinv;
+        Eigen::Matrix3d skew_t;
 
         // Householder is just 500 ns slower than analytic, but is significantly more stable
         for (int i=0; i < w.size(); i++) {
@@ -98,7 +96,16 @@ namespace ValtonenOrnhagArxiv2021 {
                 auto qr = M.transpose().colPivHouseholderQr();
                 Q = qr.householderQ();
                 relpose.t = Q.col(2);
-                relpose.f = std::real(w[i]);
+                relpose.f = std::real(w[i]) / scale;
+
+                // Compute fundamental matrix
+                kinv << 1.0 / relpose.f, 1.0 / relpose.f, 1.0;
+                Kinv = kinv.asDiagonal();
+                skew_t << 0, -relpose.t(2), relpose.t(1),
+                          relpose.t(2), 0, -relpose.t(0),
+                         -relpose.t(1), relpose.t(0), 0;
+                relpose.F = Kinv * skew_t * R * Kinv;
+
                 output.push_back(relpose);
             }
         }
