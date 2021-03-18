@@ -29,7 +29,7 @@ namespace ValtonenOrnhagArxiv2021 {
 inline void fast_eigenvector_solver(double *eigv,
     int neig,
     const Eigen::Matrix<double, 11, 11> &AM,
-    Eigen::MatrixXcd &sols);
+    Eigen::MatrixXcd *sols);
 Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data, const bool use_fast_solver) {
     // Compute coefficients
     Eigen::VectorXd coeffs = DronePoseLib::ValtonenOrnhagArxiv2021::coeffs_frEfr(data);
@@ -81,7 +81,7 @@ Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data, const bool use_fast_s
         double roots[11];
         int nroots;
         find_real_roots_sturm(p, 11, roots, &nroots, 8, 0);
-        fast_eigenvector_solver(roots, nroots, AM, sols);
+        fast_eigenvector_solver(roots, nroots, AM, &sols);
 
         // Remove unneccessary columns
         sols.conservativeResize(2, nroots);
@@ -101,7 +101,7 @@ inline void fast_eigenvector_solver(
     double *eigv,
     int neig,
     const Eigen::Matrix<double, 11, 11> &AM,
-    Eigen::MatrixXcd &sols) {
+    Eigen::MatrixXcd *sols) {
     static const int ind[] = {0, 1, 5};
     // Truncated action matrix containing non-trivial rows
     Eigen::Matrix<double, 3, 11> AMs;
@@ -124,8 +124,8 @@ inline void fast_eigenvector_solver(
         AA(2, 2) = AA(2, 2) - zi[3];
 
         Eigen::Vector2d s = AA.leftCols(2).colPivHouseholderQr().solve(-AA.col(2));
-        sols(0, i) = zi[0];
-        sols(1, i) = s(1);
+        (*sols)(0, i) = zi[0];
+        (*sols)(1, i) = s(1);
     }
 }
 }  // namespace ValtonenOrnhagArxiv2021

@@ -73,9 +73,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     Eigen::VectorXd R2_tmp = Eigen::Map<Eigen::VectorXd>(mxGetPr(prhs[3]), 9);
     Eigen::MatrixXd R1 = Eigen::Map<Eigen::MatrixXd>(R1_tmp.data(), 3, 3);
     Eigen::MatrixXd R2 = Eigen::Map<Eigen::MatrixXd>(R2_tmp.data(), 3, 3);
-    
+
     // Compute output
-    std::vector<DronePoseLib::RelPose> posedata = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, use_fast_solver);
+    std::vector<DronePoseLib::RelPose> posedata =
+        DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, use_fast_solver);
 
     // Wrap it up to Matlab compatible output
     std::size_t NUMBER_OF_STRUCTS = posedata.size();
