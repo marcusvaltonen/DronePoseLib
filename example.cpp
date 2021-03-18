@@ -60,13 +60,27 @@ int main() {
     R1 = Eigen::Matrix3d::Random(3, 3);
     R2 = Eigen::Matrix3d::Random(3, 3);
 
+    bool use_fast_solver = false;
+
     start = std::chrono::steady_clock::now();
     for (int i = 0; i < nbr_iter; i++) {
-        poses = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2);
+        poses = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, use_fast_solver);
     }
     end = std::chrono::steady_clock::now();
 
     std::cout << "Elapsed time (frEfr): "
+        << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / nbr_iter
+        << " μs" << std::endl;
+
+    use_fast_solver = true;
+
+    start = std::chrono::steady_clock::now();
+    for (int i = 0; i < nbr_iter; i++) {
+        poses = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, use_fast_solver);
+    }
+    end = std::chrono::steady_clock::now();
+
+    std::cout << "Elapsed time (frEfr) fast: "
         << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / nbr_iter
         << " μs" << std::endl;
 

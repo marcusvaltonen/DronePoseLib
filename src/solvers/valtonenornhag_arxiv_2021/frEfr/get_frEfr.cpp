@@ -41,7 +41,8 @@ namespace ValtonenOrnhagArxiv2021 {
         const Eigen::MatrixXd &p1,
         const Eigen::MatrixXd &p2,
         const Eigen::Matrix3d &R1,
-        const Eigen::Matrix3d &R2
+        const Eigen::Matrix3d &R2,
+        const bool use_fast_solver
     ) {
         // This is a 4-point method
         const int nbr_pts = 4;
@@ -83,7 +84,7 @@ namespace ValtonenOrnhagArxiv2021 {
                  Eigen::Map<Eigen::VectorXd>(R.data(), 9);
 
         // Extract solution
-        Eigen::MatrixXcd sols = DronePoseLib::ValtonenOrnhagArxiv2021::solver_frEfr(input);
+        Eigen::MatrixXcd sols = DronePoseLib::ValtonenOrnhagArxiv2021::solver_frEfr(input, use_fast_solver);
 
         // Pre-processing: Remove complex-valued solutions
         double thresh = 1e-12;

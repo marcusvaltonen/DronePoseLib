@@ -20,11 +20,17 @@
 
 #include "solver_frEfr.hpp"
 #include <Eigen/Dense>
+#include "sturm.h"
+#include "charpoly.h"
 #include "coeffs_frEfr.hpp"
 
 namespace DronePoseLib {
 namespace ValtonenOrnhagArxiv2021 {
-Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data) {
+inline void fast_eigenvector_solver(double *eigv,
+    int neig,
+    const Eigen::Matrix<double, 11, 11> &AM,
+    Eigen::MatrixXcd *sols);
+Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data, const bool use_fast_solver) {
     // Compute coefficients
     Eigen::VectorXd coeffs = DronePoseLib::ValtonenOrnhagArxiv2021::coeffs_frEfr(data);
 
@@ -65,18 +71,62 @@ Eigen::MatrixXcd solver_frEfr(const Eigen::VectorXd &data) {
         AM.row(i) = RR.row(AM_ind[i]);
     }
 
-    Eigen::Matrix<std::complex<double>, 2, 11> sols;
-    sols.setZero();
-
     // Solve eigenvalue problem
-    Eigen::EigenSolver<Eigen::Matrix<double, 11, 11> > es(AM);
-    Eigen::ArrayXcd D = es.eigenvalues();
-    Eigen::ArrayXXcd V = es.eigenvectors();
-    V = (V / V.row(10).array().replicate(11, 1)).eval();
+    Eigen::MatrixXcd sols(2, 11);
+    sols.setZero();
+    if (use_fast_solver) {
+        double p[1+11];
+        Eigen::Matrix<double, 11, 11> AMp = AM;
+        charpoly_danilevsky_piv(AMp, p);
+        double roots[11];
+        int nroots;
+        find_real_roots_sturm(p, 11, roots, &nroots, 8, 0);
+        fast_eigenvector_solver(roots, nroots, AM, &sols);
 
-    sols.row(0) = D.transpose().array();
-    sols.row(1) = V.row(8).array() / (sols.row(0).array());
+        // Remove unneccessary columns
+        sols.conservativeResize(2, nroots);
+    } else {
+        Eigen::EigenSolver<Eigen::Matrix<double, 11, 11> > es(AM);
+        Eigen::ArrayXcd D = es.eigenvalues();
+        Eigen::ArrayXXcd V = es.eigenvectors();
+        V = (V / V.row(10).array().replicate(11, 1)).eval();
+
+        sols.row(0) = D.transpose().array();
+        sols.row(1) = V.row(8).array() / (sols.row(0).array());
+    }
     return sols;
+}
+
+inline void fast_eigenvector_solver(
+    double *eigv,
+    int neig,
+    const Eigen::Matrix<double, 11, 11> &AM,
+    Eigen::MatrixXcd *sols) {
+    static const int ind[] = {0, 1, 5};
+    // Truncated action matrix containing non-trivial rows
+    Eigen::Matrix<double, 3, 11> AMs;
+    double zi[5];
+
+    for (int i = 0; i < 3; i++) {
+        AMs.row(i) = AM.row(ind[i]);
+    }
+    for (int i = 0; i < neig; i++) {
+        zi[0] = eigv[i];
+        for (int j = 1; j < 5; j++) {
+            zi[j] = zi[j - 1] * eigv[i];
+        }
+        Eigen::Matrix3d AA;
+        AA.col(0) = zi[3] * AMs.col(0) + zi[2] * AMs.col(2) + zi[1] * AMs.col(4);
+        AA.col(1) = zi[3] * AMs.col(1) + zi[2] * AMs.col(3) + zi[1] * AMs.col(6) + zi[0] * AMs.col(8);
+        AA.col(2) = zi[2] * AMs.col(5) + zi[1] * AMs.col(7) + zi[0] * AMs.col(9) + AMs.col(10);
+        AA(0, 0) = AA(0, 0) - zi[4];
+        AA(1, 1) = AA(1, 1) - zi[4];
+        AA(2, 2) = AA(2, 2) - zi[3];
+
+        Eigen::Vector2d s = AA.leftCols(2).colPivHouseholderQr().solve(-AA.col(2));
+        (*sols)(0, i) = zi[0];
+        (*sols)(1, i) = s(1);
+    }
 }
 }  // namespace ValtonenOrnhagArxiv2021
 }  // namespace DronePoseLib

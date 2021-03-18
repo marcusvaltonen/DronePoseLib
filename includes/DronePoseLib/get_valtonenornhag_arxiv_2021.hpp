@@ -32,7 +32,8 @@ std::vector<RelPose> get_fEf(
 );
 std::vector<RelPose> get_frEfr(
     const Eigen::MatrixXd &p1, const Eigen::MatrixXd &p2,
-    const Eigen::Matrix3d &R1, const Eigen::Matrix3d &R2
+    const Eigen::Matrix3d &R1, const Eigen::Matrix3d &R2,
+    const bool use_fast_solver
 );
 }  // namespace ValtonenOrnhagArxiv2021
 }  // namespace DronePoseLib

@@ -26,8 +26,8 @@
 #include "mex.h"  // NOLINT [build/include_subdir]
 #define NUMBER_OF_FIELDS (sizeof(field_names)/sizeof(*field_names))
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    if (nrhs != 4) {
-        mexErrMsgIdAndTxt("get_valtonenornhag_arxiv_2021_frEfr:nrhs", "Four inputs required.");
+    if (nrhs < 4 || nrhs > 5) {
+        mexErrMsgIdAndTxt("get_valtonenornhag_arxiv_2021_frEfr:nrhs", "Four or five inputs required.");
     }
     if (nlhs != 1) {
         mexErrMsgIdAndTxt("get_valtonenornhag_arxiv_2021_frEfr:nlhs", "One output required.");
@@ -54,6 +54,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         mexErrMsgIdAndTxt("get_valtonenornhag_arxiv_2021_frEfr:incorrectSize4",
                           "Incorrect input size of fourth argument");
     }
+    if (nrhs == 5 && (!mxIsLogical(prhs[4]) || mxGetNumberOfElements(prhs[4]) != 1)) {
+        mexErrMsgIdAndTxt("get_valtonenornhag_arxiv_2021_frEfr:notLogical", "Last input must be type logical.");
+    }
+    bool use_fast_solver = false;
+    if (nrhs == 5) {
+        bool *var = mxGetLogicals(prhs[4]);
+        use_fast_solver = var[0];
+    }
 
     // Convert to expected input
     // TODO(marcusvaltonen): Cast directly to MatrixXd?
@@ -67,7 +75,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     Eigen::MatrixXd R2 = Eigen::Map<Eigen::MatrixXd>(R2_tmp.data(), 3, 3);
 
     // Compute output
-    std::vector<DronePoseLib::RelPose> posedata = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2);
+    std::vector<DronePoseLib::RelPose> posedata =
+        DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, use_fast_solver);
 
     // Wrap it up to Matlab compatible output
     std::size_t NUMBER_OF_STRUCTS = posedata.size();
