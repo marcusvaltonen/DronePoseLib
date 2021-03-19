@@ -33,24 +33,22 @@ set(SRCS
 
 set(EXAMPLE_SRCS example.cpp)
 
-set(TEST_SRCS
-    tests/test_main.cpp
-    tests/test_valtonenornhag_arxiv_2021.cpp
-)
-
 add_executable(example ${SRCS} ${EXAMPLE_SRCS})
 target_link_libraries(example PRIVATE Eigen3::Eigen)
 
-add_executable(tests ${SRCS} ${TEST_SRCS})
-target_include_directories(tests PRIVATE tests)
-target_link_libraries(tests PRIVATE Eigen3::Eigen)
-
-if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-message("debug mode")
-LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake_modules")
-include(CodeCoverage)
-APPEND_COVERAGE_COMPILER_FLAGS()
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(TEST_SRCS
+        tests/test_main.cpp
+        tests/test_valtonenornhag_arxiv_2021.cpp
+    )
+    add_executable(tests ${SRCS} ${TEST_SRCS})
+    target_include_directories(tests PRIVATE tests)
+    target_link_libraries(tests PRIVATE Eigen3::Eigen)
+    if(CMAKE_COMPILER_IS_GNUCXX)
+        LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake_modules")
+        include(CodeCoverage)
+        APPEND_COVERAGE_COMPILER_FLAGS()
+    endif()
+    add_test(NAME tests COMMAND tests)
+    enable_testing()
 endif()
-
-add_test(NAME tests COMMAND tests)
-enable_testing()

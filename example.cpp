@@ -40,7 +40,7 @@ int main() {
     R2 = Eigen::Matrix3d::Random(3, 3);
 
     auto start = std::chrono::steady_clock::now();
-    std::cout << "test" << std::endl;
+    std::cout << "=== DronePoseLib timings ===" << std::endl;
 
     std::vector<DronePoseLib::RelPose> poses;
 
