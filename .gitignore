@@ -36,6 +36,7 @@
 
 # Extra - project specific
 build
+build_release
 *.mex*
 *.dat
 *.mat
