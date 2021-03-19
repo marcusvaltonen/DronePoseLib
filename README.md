@@ -29,13 +29,9 @@ Installation for Ubuntu/Debian:
 ```bash
     $ apt-get install libeigen3-dev
 ```
-The source code has been compiled and tested on Ubuntu 18.04 (Bionic Beaver) with clang++-7 to clang++-9.
+The source code has been compiled and tested on Ubuntu 18.04 (Bionic Beaver)
+with g++-7 to g++-9 and clang++-7 to clang++-9.
 Furthermore, it is tested on OSX with Xcode 12.
-
-### Compiling with g++
-It is possible to compile it using g++ (tested on version 7.5.0) but requires more
-memory (tested succesfully with 16 GB internal memory).
-We are working on reducing the memory footprint.
 
 ## Using the solver in MATLAB
 It is possible to MEX-compile the solver and use it in MATLAB.
