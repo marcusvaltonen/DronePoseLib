@@ -126,7 +126,7 @@ TEST_CASE("Valtonen Ornhag Arxiv 2021 - frEfr") {
     // Test radial distortion coefficient
     REQUIRE(poses[0].r == Approx(-203321.4180906687).margin(tol));
     REQUIRE(poses[1].r == Approx(-86722.00865063918).margin(tol));
-    REQUIRE(poses[2].r == Approx(5.674316885457046e-10).margin(tol));
+    REQUIRE(poses[2].r == Approx(1.987432298474289e-08).margin(tol));
     REQUIRE(poses[3].r == Approx(9774.556116633164).margin(tol));
     REQUIRE(poses[4].r == Approx(190060.1388957948).margin(tol));
     REQUIRE(poses[5].r == Approx(-15606.02225174152).margin(tol));
@@ -235,7 +235,7 @@ TEST_CASE("Valtonen Ornhag Arxiv 2021 - frEfr - fast option") {
     REQUIRE(poses[5].r == Approx(483098.20128659830000).margin(tol));
     REQUIRE(poses[6].r == Approx(-15606.02225167828000).margin(tol));
     REQUIRE(poses[7].r == Approx(9774.5555795762380000).margin(tol));
-    REQUIRE(poses[8].r == Approx(6.352311187587197e-07).margin(tol));
+    REQUIRE(poses[8].r == Approx(4.609648739733399e-08).margin(tol));
 
     // Test fundamental matrix
     tol = 1e-7;
