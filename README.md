@@ -42,7 +42,13 @@ Note that your local Eigen path may be different, e.g. `/usr/local/include/eigen
 Tested on version R2020a Linux (64-bit).
 
 ## Using the solver in Python
-This is unfortunately not supported yet, but will be in the future.
+A pre-alpha release is now available pn PyPI, and can be downloades using
+
+```bash
+    $ pip install droneposelib
+```
+See more documentation on the separate python repository [here](https://github.com/marcusvaltonen/python-droneposelib).
+
 
 ## Additional information
 These solvers were generated using the automatic generator proposed by
