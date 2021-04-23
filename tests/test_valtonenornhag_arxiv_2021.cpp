@@ -124,15 +124,15 @@ TEST_CASE("Valtonen Ornhag Arxiv 2021 - frEfr") {
     REQUIRE(poses[8].f == Approx(944.9706198704850).margin(tol));
 
     // Test radial distortion coefficient
-    REQUIRE(poses[0].r == Approx(-203321.4180906687).margin(tol));
-    REQUIRE(poses[1].r == Approx(-86722.00865063918).margin(tol));
-    REQUIRE(poses[2].r == Approx(1.987432298474289e-08).margin(tol));
-    REQUIRE(poses[3].r == Approx(9774.556116633164).margin(tol));
-    REQUIRE(poses[4].r == Approx(190060.1388957948).margin(tol));
-    REQUIRE(poses[5].r == Approx(-15606.02225174152).margin(tol));
-    REQUIRE(poses[6].r == Approx(-10387926.07338967).margin(tol));
-    REQUIRE(poses[7].r == Approx(-1845837.551419409).margin(tol));
-    REQUIRE(poses[8].r == Approx(483098.2019224214).margin(tol));
+    REQUIRE(poses[0].r == Approx(-0.00000069915248).margin(tol));
+    REQUIRE(poses[1].r == Approx(-0.00000029820719).margin(tol));
+    REQUIRE(poses[2].r == Approx(0.00000000000000).margin(tol));
+    REQUIRE(poses[3].r == Approx(0.00000003361134).margin(tol));
+    REQUIRE(poses[4].r == Approx(0.00000065355150).margin(tol));
+    REQUIRE(poses[5].r == Approx(-0.00000005366375).margin(tol));
+    REQUIRE(poses[6].r == Approx(-0.00003572050787).margin(tol));
+    REQUIRE(poses[7].r == Approx(-0.00000634720100).margin(tol));
+    REQUIRE(poses[8].r == Approx(0.00000166120870).margin(tol));
 
     // Test fundamental matrix
     tol = 1e-7;
@@ -227,15 +227,15 @@ TEST_CASE("Valtonen Ornhag Arxiv 2021 - frEfr - fast option") {
     REQUIRE(poses[8].f == Approx(2445.4704181863260).margin(tol));
 
     // Test radial distortion coefficient
-    REQUIRE(poses[0].r == Approx(-203321.4181034909000).margin(tol));
-    REQUIRE(poses[1].r == Approx(-86722.00865083658000).margin(tol));
-    REQUIRE(poses[2].r == Approx(190060.13889686850000).margin(tol));
-    REQUIRE(poses[3].r == Approx(-10387926.07347903000).margin(tol));
-    REQUIRE(poses[4].r == Approx(-1845837.551419647000).margin(tol));
-    REQUIRE(poses[5].r == Approx(483098.20128659830000).margin(tol));
-    REQUIRE(poses[6].r == Approx(-15606.02225167828000).margin(tol));
-    REQUIRE(poses[7].r == Approx(9774.5555795762380000).margin(tol));
-    REQUIRE(poses[8].r == Approx(4.609648739733399e-08).margin(tol));
+    REQUIRE(poses[0].r == Approx(-0.00000069915248).margin(tol));
+    REQUIRE(poses[1].r == Approx(-0.00000029820719).margin(tol));
+    REQUIRE(poses[2].r == Approx(0.00000065355150).margin(tol));
+    REQUIRE(poses[3].r == Approx(-0.00003572050787).margin(tol));
+    REQUIRE(poses[4].r == Approx(-0.00000634720100).margin(tol));
+    REQUIRE(poses[5].r == Approx(0.00000166120870).margin(tol));
+    REQUIRE(poses[6].r == Approx(-0.00000005366375).margin(tol));
+    REQUIRE(poses[7].r == Approx(0.00000003361134).margin(tol));
+    REQUIRE(poses[8].r == Approx(0.00000000000000).margin(tol));
 
     // Test fundamental matrix
     tol = 1e-7;
