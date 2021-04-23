@@ -27,5 +27,5 @@ end
 f_err = min(tmp1);
 F_err = min(tmp2);
 if nargout > 2
-    r_err = min(tmp2);
+    r_err = min(tmp3);
 end
