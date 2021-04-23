@@ -14,11 +14,11 @@ for j = 1:nbr_iter
         fprintf(1, 'Iter: %d\n', j)
     end
     % Generate random problem instance
-    r = -rand * (1 - 1e-6);
+    r = -rand * 1e-6;
     [R1, R2, ~, f, F, x1, x2, R, t, x1u, x2u] = generate_points_realistic(N, 0, r);
 
     % Solve problem
-    out = get_valtonenornhag_arxiv_2021_frEfr_mex(x1u(1:2,:), x2u(1:2,:), R1, R2);
+    out = get_valtonenornhag_arxiv_2021_frEfr_mex(x1(1:2,:), x2(1:2,:), R1, R2);
 
     % Compare to ground truth
     [error_f(j), error_F(j), error_r(j)] = compare_to_gt(out, f, F, r);

@@ -110,7 +110,7 @@ namespace ValtonenOrnhagArxiv2021 {
                 // Extract translation
                 relpose.t = extract_translation(f, r, R1, R2, x1t.leftCols<2>(), x2t.leftCols<2>());
                 relpose.f = f / scale;
-                relpose.r = r / std::pow(scale, 2);
+                relpose.r = r * std::pow(scale, 2);
 
                 // Compute fundamental matrix
                 kinv << 1.0 / relpose.f, 1.0 / relpose.f, 1.0;
