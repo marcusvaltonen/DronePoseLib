@@ -36,5 +36,12 @@ std::vector<RelPose> get_frEfr(
     const bool use_fast_solver
 );
 }  // namespace ValtonenOrnhagArxiv2021
+namespace ValtonenOrnhagArxiv2021Extra {
+std::vector<RelPose> get_rEr(
+    const Eigen::MatrixXd &p1, const Eigen::MatrixXd &p2,
+    const Eigen::Matrix3d &R1, const Eigen::Matrix3d &R2,
+    double focal_length
+);
+}  // namespace ValtonenOrnhagArxiv2021Extra
 }  // namespace DronePoseLib
 #endif  // INCLUDES_DRONEPOSELIB_GET_VALTONENORNHAG_ARXIV_2021_HPP_

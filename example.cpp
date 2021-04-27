@@ -53,6 +53,18 @@ int main() {
         << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / nbr_iter
         << " ns" << std::endl;
 
+    // Test rEr
+    double focal_length = 1.0;
+    start = std::chrono::steady_clock::now();
+    for (int i = 0; i < nbr_iter; i++) {
+        poses = DronePoseLib::ValtonenOrnhagArxiv2021Extra::get_rEr(x1, x2, R1, R2, focal_length);
+    }
+    end = std::chrono::steady_clock::now();
+
+    std::cout << "Elapsed time (rEr): "
+        << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / nbr_iter
+        << " ns" << std::endl;
+
     // Test frEfr
     N = 4;
     x1 = Eigen::MatrixXd::Random(2, N);
