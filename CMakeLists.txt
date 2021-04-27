@@ -19,6 +19,7 @@ include_directories(
     src/helpers
     src/solvers/valtonenornhag_arxiv_2021/fEf
     src/solvers/valtonenornhag_arxiv_2021/frEfr
+    src/solvers/valtonenornhag_arxiv_2021/rEr
 )
 
 set(SRCS
@@ -29,6 +30,7 @@ set(SRCS
     src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp
     src/solvers/valtonenornhag_arxiv_2021/frEfr/get_frEfr.cpp
     src/solvers/valtonenornhag_arxiv_2021/frEfr/solver_frEfr.cpp
+    src/solvers/valtonenornhag_arxiv_2021/rEr/get_rEr.cpp
 )
 
 set(EXAMPLE_SRCS example.cpp)
