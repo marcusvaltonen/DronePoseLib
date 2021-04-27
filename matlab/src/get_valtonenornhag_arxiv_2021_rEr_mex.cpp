@@ -73,7 +73,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     double* focal_ref = mxGetPr(prhs[4]);
 
     // Compute output
-    std::vector<RelPose> posedata = DronePoseLib::ValtonenOrnhagArxiv2021Extra::get_rEr_no_rot(x1, x2, R1, R2, focal_ref[0]);
+    std::vector<DronePoseLib::RelPose> posedata = DronePoseLib::ValtonenOrnhagArxiv2021Extra::get_rEr(x1, x2, R1, R2, focal_ref[0]);
 
     // Wrap it up to Matlab compatible output
     std::size_t NUMBER_OF_STRUCTS = posedata.size();
