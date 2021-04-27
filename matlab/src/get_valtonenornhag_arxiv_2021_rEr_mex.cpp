@@ -73,7 +73,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     double* focal_ref = mxGetPr(prhs[4]);
 
     // Compute output
-    std::vector<DronePoseLib::RelPose> posedata = DronePoseLib::ValtonenOrnhagArxiv2021Extra::get_rEr(x1, x2, R1, R2, focal_ref[0]);
+    std::vector<DronePoseLib::RelPose> posedata =
+        DronePoseLib::ValtonenOrnhagArxiv2021Extra::get_rEr(x1, x2, R1, R2, focal_ref[0]);
 
     // Wrap it up to Matlab compatible output
     std::size_t NUMBER_OF_STRUCTS = posedata.size();
@@ -112,14 +113,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         zr = mxGetPr(field_value);
         zr[0] = posedata[i].r;
         mxSetFieldByNumber(plhs[0], i, r_field, field_value);
-        
+
         // Create F
         field_value = mxCreateDoubleMatrix(3, 3, mxREAL);
         zr = mxGetPr(field_value);
         for (Eigen::Index j = 0; j < 9; j++) {
             zr[j] = posedata[i].F(j);
         }
-        mxSetFieldByNumber(plhs[0], i, F_field, field_value);        
+        mxSetFieldByNumber(plhs[0], i, F_field, field_value);
     }
 }
 #endif  // MATLAB_MEX_FILE
