@@ -283,3 +283,67 @@ TEST_CASE("Valtonen Ornhag Arxiv 2021 - frEfr - fast option") {
                 -6.30117988926295e-06,  0.000509489020750372,                     1;
     REQUIRE(poses[8].F.isApprox(expected, tol));
 }
+
+TEST_CASE("Valtonen Ornhag Arxiv 2021 Extra - rEr") {
+    Eigen::MatrixXd p1(2, 3);
+    Eigen::MatrixXd p2(2, 3);
+    Eigen::Matrix3d R1, R2;
+
+    p1 <<  99.0825859985542, 1136.84241396289, -1031.66650596755,
+          -301.923289351466, 1760.62028612233, -533.989983528509;
+
+    p2 <<  1829.78818884974, 15378.7866880232,  612.159309750213,
+           474.180433404958, 4677.92468041337,  1092.76420021176;
+
+    R1 <<  0.983417707845482,  0.013453875580959,  0.180855204867843,
+          -0.060089831339915,  0.965084992860598,  0.254951306575981,
+          -0.171110560940808, -0.261591188282616,  0.949890112669571,
+
+    R2 <<  0.556837962037774,  0.329755275145440,  0.762360113428931,
+          -0.787076103923440,  0.502747650438714,  0.357429722618378,
+          -0.265410419287405, -0.799065866178820,  0.539491474299248;
+
+    std::vector<DronePoseLib::RelPose> poses;
+    double focal_length = 1.0;
+    poses = DronePoseLib::ValtonenOrnhagArxiv2021Extra::get_rEr(p1, p2, R1, R2, focal_length);
+    double tol = 1e-12;
+
+    // Test size
+    REQUIRE(poses.size() == 4);
+
+    // Test focal length
+    REQUIRE(poses[0].f == Approx(1.0).margin(tol));
+    REQUIRE(poses[1].f == Approx(1.0).margin(tol));
+    REQUIRE(poses[2].f == Approx(1.0).margin(tol));
+    REQUIRE(poses[3].f == Approx(1.0).margin(tol));
+
+    // Test radial distortion coefficient
+    REQUIRE(poses[0].r == Approx(-4.2874876051071e-05).margin(tol));
+    REQUIRE(poses[1].r == Approx(-0.000246913930531072).margin(tol));
+    REQUIRE(poses[2].r == Approx(0.00184604041266755).margin(tol));
+    REQUIRE(poses[3].r == Approx(-0.00109924194761612).margin(tol));
+
+    // Test fundamental matrix
+    tol = 1e-7;
+    Eigen::Matrix3d expected;
+
+    expected <<  0.264934547706507,   0.145240095976332,  -0.465106205345824,
+                0.0309556703247373,   -0.39180514557381,   0.776482268850591,
+                 0.924467577138297,  -0.282908100262259, -0.0178797053794708;
+    REQUIRE(poses[0].F.isApprox(expected, tol));
+
+    expected <<  0.0598818526297369,  -0.332627369542942,   0.217582108961897,
+                -0.0388012497427252,  -0.481754588366569,   0.797147303075138,
+                  0.393684983857834,  -0.744417584343487,  -0.510146031080832;
+    REQUIRE(poses[1].F.isApprox(expected, tol));
+
+    expected <<  0.642219648136942, -0.678026024845748, -0.217842639644248,
+                 0.703919384125803,  0.629690865155572,  0.297361918557707,
+                -0.295697506917121,  0.109786187781648, 0.0212602749320976;
+    REQUIRE(poses[2].F.isApprox(expected, tol));
+
+    expected << 0.591572411289522,  -0.130509314604598,  -0.636919856945032,
+                0.410441925689088,  0.0482225493952967,   0.753793979143006,
+                0.687481917761856, -0.0525530771809502,   0.113824127649439;
+    REQUIRE(poses[3].F.isApprox(expected, tol));
+}
