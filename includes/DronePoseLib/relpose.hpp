@@ -30,6 +30,15 @@ struct RelPose {
     double f;
     double r;
 };
+struct Camera {
+    Camera() : focal(1.0) {}
+    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans, double f) : R(rot), t(trans), focal(f) {};
+    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans) : R(rot), t(trans), focal(1.0) {};
+    Eigen::Matrix3d R;
+    Eigen::Vector3d t;
+    double focal;
+    std::vector<double> dist_params;
+};
 }  // namespace DronePoseLib
 
 #endif  // INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
