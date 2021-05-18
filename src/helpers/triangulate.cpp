@@ -23,7 +23,7 @@
 #include "relpose.hpp"
 
 namespace DronePoseLib {
-Eigen::Vector3d triangulate(const Camera& pose, const Vector2d& p1, const Vector2d& p2) {
+Eigen::Vector3d triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vector2d& p2) {
     // First pose is assumed to be the identity
     Eigen::MatrixXd M(6, 6);
 

@@ -21,6 +21,7 @@
 #ifndef INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
 #define INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
 
+#include <vector>
 #include <Eigen/Dense>
 
 namespace DronePoseLib {
