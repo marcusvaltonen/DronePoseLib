@@ -24,6 +24,7 @@
 #include <Eigen/Dense>
 #include "relpose.hpp"
 #include "pose_estimator.hpp"
+#include "triangulate.hpp"
 
 namespace DronePoseLib {
 
@@ -56,8 +57,8 @@ public:
 		Points2D p2(2, sample.size());
 
 		for (int i = 0; i < sample.size(); i++) {
-			x.col(i) = image_points.col(sample[i]);
-			X.col(i) = world_points.col(sample[i]);
+			p1.col(i) = image_points1.col(sample[i]);
+			p2.col(i) = image_points2.col(sample[i]);
 		}
 		solver.estimate(p1, p2, poses);
 
@@ -110,7 +111,7 @@ public:
 	double EvaluateModelOnPoint(const Camera& pose, int i) const {
         // TODO: Triangualte points (relative pose - first pose is normalized)
         // TODO: Radial undistort first.
-        Eigen::Vector3d X Triangulate(pose, image_points1.col(i), image_points2.col(i))
+        Eigen::Vector3d X = DronePoseLib::triangulate(pose, image_points1.col(i), image_points2.col(i));
 
 		// Compute reprojected point in first camera
 		Eigen::Matrix<double, 2, Eigen::Dynamic> z1(2, 1);
@@ -151,4 +152,5 @@ private:
 	Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;
 	Eigen::Matrix<double, 2, Eigen::Dynamic> image_points2;
 };
-}  // SRC_RANSAC_RANSAC_ESTIMATOR_HPP_
+}
+#endif  // SRC_RANSAC_RANSAC_ESTIMATOR_HPP_

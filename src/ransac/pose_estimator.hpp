@@ -52,8 +52,8 @@ namespace DronePoseLib {
 	protected:
 		PoseEstimator() = default;
 	private:
-		inline void filter_chirality(const Points3D &world_points, std::vector<Camera> &poses) const;
-		inline void filter_reprojection_error(const Points2D &image_points, const Points3D &world_points, double tol, std::vector<Camera> &poses) const;
+		// inline void filter_chirality(const Points3D &world_points, std::vector<Camera> &poses) const;
+		// inline void filter_reprojection_error(const Points2D &image_points, const Points3D &world_points, double tol, std::vector<Camera> &poses) const;
 	};
 };
 
@@ -67,14 +67,16 @@ int DronePoseLib::PoseEstimator<Solver>::estimate(const Points2D &image_points1,
 	// Rescale image plane
 	double f0 = 1.0;
 	if (normalize_image_coord) {
-		f0 = x.colwise().norm().mean() / std::sqrt(2.0);
-		x /= f0;
+		f0 = std::max(x1.colwise().norm().mean() / std::sqrt(2.0), x2.colwise().norm().mean() / std::sqrt(2.0));
+		x1 /= f0;
+		x2 /= f0;
 	}
 
 	// Rescale and translate world coordinate system
 	Eigen::Vector3d t0(0.0, 0.0, 0.0);
 	double s0 = 1.0;
 
+    /*
 	if (center_world_coord) {
 		t0 = X.rowwise().mean();
 		X.colwise() -= t0;
@@ -83,16 +85,19 @@ int DronePoseLib::PoseEstimator<Solver>::estimate(const Points2D &image_points1,
 		s0 = X.colwise().norm().mean();
 		X /= s0;
 	}
+    */
 
 	// Call solver implementation
 	poses->clear();
-	int n_sols = static_cast<const Solver*>(this)->solve(x, X, poses);
+	int n_sols = static_cast<const Solver*>(this)->solve(x1, x2, poses);
 
+    /*
 	if (check_chirality)
 		filter_chirality(X, *poses);
 
 	if (check_reprojection_error)
 		filter_reprojection_error(x, X, reprojection_threshold / f0, *poses);
+    */
 
 	// Revert image coordinate scaling
 	if (normalize_image_coord) {
@@ -102,6 +107,7 @@ int DronePoseLib::PoseEstimator<Solver>::estimate(const Points2D &image_points1,
 	}
 
 	// Revert world coordinate changes
+    /*
 	if (normalize_world_coord) {
 		for (int i = 0; i < poses->size(); ++i)
 			(*poses)[i].t = (*poses)[i].t * s0;
@@ -110,12 +116,12 @@ int DronePoseLib::PoseEstimator<Solver>::estimate(const Points2D &image_points1,
 		for (int i = 0; i < poses->size(); ++i)
 			(*poses)[i].t -= (*poses)[i].R * t0;
 	}
-
+    */
 
 	return n_sols;
 }
 
-
+/*
 template<class Solver>
 void DronePoseLib::PoseEstimator<Solver>::filter_chirality(const Points3D& world_points, std::vector<Camera>& poses) const {
 	auto any_point_behind = [&world_points](const Camera& p) { return ((p.R.block<1, 3>(2, 0) * world_points).array() + p.t(2)).minCoeff() < 0;  };
@@ -150,4 +156,6 @@ void DronePoseLib::PoseEstimator<Solver>::filter_reprojection_error(const Points
 			it = poses.erase(it);
 		}
 	}
-}  // SRC_RANSAC_POSE_ESTIMATOR_HPP_
+}
+*/
+#endif  // SRC_RANSAC_POSE_ESTIMATOR_HPP_

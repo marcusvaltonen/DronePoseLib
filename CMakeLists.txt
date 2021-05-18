@@ -18,6 +18,7 @@ include_directories("thirdparty/RansacLib")
 include_directories(
     includes/DronePoseLib
     src/helpers
+    src/ransac
     src/solvers/valtonenornhag_arxiv_2021/fEf
     src/solvers/valtonenornhag_arxiv_2021/frEfr
     src/solvers/valtonenornhag_arxiv_2021/rEr

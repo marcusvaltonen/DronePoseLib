@@ -23,22 +23,26 @@ int main() {
 
 	std::vector<double> params2 = { -0.12, 0.034 };
 
-    DronePoseLib::ValtonenOrnhagArxiv2021::Solver<>
-	larsson_iccv19::Solver<2, 0, true> estimator;
+    DronePoseLib::ValtonenOrnhagArxiv2021::Solver<true, true> estimator;
 
-	generate_scene_and_image(100, 2, 20, 70, false, &pose_gt, &x, &X, 1.0);
-	add_rational_distortion(params2, 2, 0, &pose_gt, &x);
-	add_focal(2000.0, &pose_gt, &x);
-	add_noise(0.5, &x);
+	generate_scene_and_image(100, 2, 20, 70, false, &pose_gt, &x1, &x1, 1.0);
+	add_rational_distortion(params2, 2, 0, &pose_gt, &x1);
+	add_rational_distortion(params2, 2, 0, &pose_gt, &x2);
+	add_focal(2000.0, &pose_gt, &x1);
+	add_focal(2000.0, &pose_gt, &x2);
+	add_noise(0.5, &x1);
+	add_noise(0.5, &x2);
 
-	RansacEstimator<larsson_iccv19::Solver<2, 0, true>> solver(x1, x2, estimator);
+	DronePoseLib::RansacEstimator<
+        DronePoseLib::ValtonenOrnhagArxiv2021::Solver<true, true>
+    > solver(x1, x2, estimator);
 
 	ransac_lib::LORansacOptions options;
 	options.squared_inlier_threshold_ = 4;
 
 	ransac_lib::LocallyOptimizedMSAC<Camera,
 		std::vector<Camera>,
-		RansacEstimator<larsson_iccv19::Solver<2, 0, true>>> lomsac;
+		DronePoselib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver<true, true>>> lomsac;
 	ransac_lib::RansacStatistics ransac_stats;
 
 	Camera best_model;
