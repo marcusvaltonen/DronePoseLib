@@ -35,7 +35,7 @@
 #include <cmath>
 #include <iostream>
 #include <numeric>
-#include "radialpose.h"
+//#include "radialpose.h"
 #include "ransac_estimator.hpp"
 #include "scene_and_pose_generation.hpp"
 
@@ -120,33 +120,38 @@ int main() {
 
 	Matrix<double, 2, Dynamic> x1;
 	Matrix<double, 2, Dynamic> x2;
-	Camera pose_gt;
+	DronePoseLib::Camera pose_gt;
 
-	std::vector<double> params2 = { -0.12, 0.034 };
+	double dist_param = -0.0000001;
 
-    DronePoseLib::ValtonenOrnhagArxiv2021::Solver<true, true> estimator;
+    DronePoseLib::ValtonenOrnhagArxiv2021::Solver estimator;
 
-	generate_scene_and_image(100, 2, 20, 70, false, &pose_gt, &x1, &x1, 1.0);
-	add_rational_distortion(params2, 2, 0, &pose_gt, &x1);
-	add_rational_distortion(params2, 2, 0, &pose_gt, &x2);
+	generate_scene_and_image(100, 2, 20, 70, false, &pose_gt, &x1, &x2, 1.0);
 	add_focal(2000.0, &pose_gt, &x1);
 	add_focal(2000.0, &pose_gt, &x2);
+	add_distortion(dist_param, &pose_gt, &x1);
+	add_distortion(dist_param, &pose_gt, &x2);
 	add_noise(0.5, &x1);
 	add_noise(0.5, &x2);
 
-	DronePoseLib::RansacEstimator<
-        DronePoseLib::ValtonenOrnhagArxiv2021::Solver<true, true>
-    > solver(x1, x2, estimator);
+    // We consider the relative pose problem
+    Eigen::Matrix3d R1;
+    R1.setIdentity();
+    Eigen::Matrix3d R2 = pose_gt.R;
+
+	DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(x1, x2, R1, R2, estimator);
 
 	ransac_lib::LORansacOptions options;
 	options.squared_inlier_threshold_ = 4;
 
-	ransac_lib::LocallyOptimizedMSAC<Camera,
-		std::vector<Camera>,
-		DronePoselib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver<true, true>>> lomsac;
+	ransac_lib::LocallyOptimizedMSAC<
+        DronePoseLib::Camera,
+		std::vector<DronePoseLib::Camera>,
+		DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver>
+    > lomsac;
 	ransac_lib::RansacStatistics ransac_stats;
 
-	Camera best_model;
+	DronePoseLib::Camera best_model;
 	int num_ransac_inliers = lomsac.EstimateModel(options, solver, &best_model, &ransac_stats);
 
 	std::cout << "   ... LOMSAC found " << num_ransac_inliers

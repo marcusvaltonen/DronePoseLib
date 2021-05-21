@@ -26,18 +26,24 @@
 #include "pose_estimator.hpp"
 #include "triangulate.hpp"
 
-namespace DronePoseLib {
+// TODO: No const& declaration as input to class? Check guidelines
+// NOTE: Points2D is optimal for up to 8 (non-minimal).
 
+namespace DronePoseLib {
 template<class Solver>
 class RansacEstimator {
 public:
 	RansacEstimator(
         Eigen::Matrix<double, 2, Eigen::Dynamic> p1,
         Eigen::Matrix<double, 2, Eigen::Dynamic> p2,
+        Eigen::Matrix3d R1,
+        Eigen::Matrix3d R2,
         Solver est) {
         // TODO: Make sure p1 and p2 are of the same length (and larger than minimal sample size)
 		image_points1 = p1;
 		image_points2 = p2;
+        rotation_matrix1 = R1;
+        rotation_matrix2 = R2;
 		solver = est;
 	}
 
@@ -60,7 +66,7 @@ public:
 			p1.col(i) = image_points1.col(sample[i]);
 			p2.col(i) = image_points2.col(sample[i]);
 		}
-		solver.estimate(p1, p2, poses);
+		solver.estimate(p1, p2, rotation_matrix1, rotation_matrix2, poses);
 
 		return poses->size();
 	}
@@ -83,7 +89,7 @@ public:
 		std::vector<Camera> poses;
 		Points2D p1s = p1.block(0, 0, 2, min_sample_size());
 		Points2D p2s = p2.block(0, 0, 2, min_sample_size());
-		solver.estimate(p1s, p2s, &poses);
+		solver.estimate(p1s, p2s, rotation_matrix1, rotation_matrix2, &poses);
 
 		// For all pose candidates compute score
 		double best_score = std::numeric_limits<double>::max();
@@ -151,6 +157,8 @@ private:
 	Solver solver;
 	Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;
 	Eigen::Matrix<double, 2, Eigen::Dynamic> image_points2;
+    Eigen::Matrix3d rotation_matrix1;
+    Eigen::Matrix3d rotation_matrix2;
 };
 }
 #endif  // SRC_RANSAC_RANSAC_ESTIMATOR_HPP_

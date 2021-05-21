@@ -35,7 +35,12 @@ namespace DronePoseLib {
 	template<class Solver>
 	class PoseEstimator {
 	public:
-		int estimate(const Points2D &image_points1, const Points2D &image_points2, std::vector<Camera> *poses) const;
+		int estimate(
+            const DronePoseLib::Points2D &image_points1,
+            const DronePoseLib::Points2D &image_points2,
+            const Eigen::Matrix3d &rotation_matrix1,
+            const Eigen::Matrix3d &rotation_matrix2,
+            std::vector<DronePoseLib::Camera> *poses) const;
 
 		inline int minimal_sample_size() const {
 			return static_cast<const Solver*>(this)->minimal_sample_size();
@@ -59,10 +64,17 @@ namespace DronePoseLib {
 
 
 template<class Solver>
-int DronePoseLib::PoseEstimator<Solver>::estimate(const Points2D &image_points1, const Points2D &image_points2, std::vector<Camera> *poses) const
+int DronePoseLib::PoseEstimator<Solver>::estimate(
+    const DronePoseLib::Points2D &image_points1,
+    const DronePoseLib::Points2D &image_points2,
+    const Eigen::Matrix3d &rotation_matrix1,
+    const Eigen::Matrix3d &rotation_matrix2,
+    std::vector<DronePoseLib::Camera> *poses) const
 {
-	Points2D x1 = image_points1;
-	Points2D x2 = image_points2;
+	DronePoseLib::Points2D x1 = image_points1;
+	DronePoseLib::Points2D x2 = image_points2;
+    Eigen::Matrix3d R1 = rotation_matrix1;
+    Eigen::Matrix3d R2 = rotation_matrix2;
 
 	// Rescale image plane
 	double f0 = 1.0;
@@ -89,7 +101,7 @@ int DronePoseLib::PoseEstimator<Solver>::estimate(const Points2D &image_points1,
 
 	// Call solver implementation
 	poses->clear();
-	int n_sols = static_cast<const Solver*>(this)->solve(x1, x2, poses);
+	int n_sols = static_cast<const Solver*>(this)->solve(x1, x2, R1, R2, poses);
 
     /*
 	if (check_chirality)

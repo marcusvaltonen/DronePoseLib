@@ -1,6 +1,6 @@
 #pragma once
 #define _USE_MATH_DEFINES
-#include "radialpose.h"
+#include "relpose.hpp"
 #include <Eigen/Dense>
 
 #define FLIPPYBOOL(boolname) bool boolname = false; for(int o_##boolname = 0; o_##boolname < 2; ++o_##boolname, boolname = true)
@@ -12,7 +12,7 @@ static const double TOL_POSE = 1.0e-6;
 
 
 using namespace Eigen;
-using namespace radialpose;
+using namespace DronePoseLib;
 using namespace std;
 
 
@@ -79,38 +79,90 @@ void project_3d_points_to_plane(Matrix<double, 3, Dynamic> *X) {
 	X->colwise() += t;
 }
 
-void generate_scene_and_image(int N, double min_depth, double max_depth, double h_fov, bool planar, Camera* pose, Matrix<double, 2, Dynamic>* image_points, Matrix<double, 3, Dynamic>* world_points, double translation_scaling = 1.0) {
+void generate_scene_and_image(int N, double min_depth, double max_depth, double h_fov, bool planar, Camera* pose, Matrix<double, 2, Dynamic>* image_points1, Matrix<double, 2, Dynamic>* image_points2, double translation_scaling = 1.0) {
 
-	image_points->resize(2, N);
-	image_points->setRandom();
+    // Use horizontal field of view to determine maximal coordinate
 	double max_coord = tan(h_fov / 2 * M_PI / 180);
-	(*image_points) *= max_coord;
 
-	world_points->resize(3, N);
-	world_points->block(0, 0, 2, N) = *image_points;
-	world_points->block(2, 0, 1, N).setOnes();
+    // Create world points
+    Eigen::Matrix<double, 3, Eigen::Dynamic> world_points;
+	world_points.resize(3, N);
+	world_points.block(0, 0, 2, N).setRandom();
+	world_points.block(0, 0, 2, N) *= max_coord;
+	world_points.block(2, 0, 1, N).setOnes();
+
+    // Add depth (third coordinate)
+	Array<double, 1, Dynamic> depths(1, N);
+	depths.setRandom();
+	depths = (max_depth - min_depth) * (depths + 1.0) / 2.0 + min_depth;
+
+	for (int i = 0; i < N; ++i) {
+		world_points.col(i) *= depths(i);
+	}
+    /*
+	if (planar) {
+		project_3d_points_to_plane(world_points);
+
+		// reproject the now planar 3D points
+		image_points1->row(0) = world_points.row(0).array() / world_points.row(2).array();
+		image_points1->row(1) = world_points.row(1).array() / world_points.row(2).array();
+	}
+    */
+
+    // Get a random (relative) pose
+	set_random_pose(pose, translation_scaling);
+
+    // First camera is assumed to be [I 0]
+    image_points1->row(0) = world_points.row(0).array() / world_points.row(2).array();
+    image_points1->row(1) = world_points.row(1).array() / world_points.row(2).array();
+
+    // Second camera is assumed to be [R t]
+    world_points = pose->R * world_points + pose->t;
+    image_points2->row(0) = world_points.row(0).array() / world_points.row(2).array();
+    image_points2->row(1) = world_points.row(1).array() / world_points.row(2).array();
+
+    // TODO: Check epipolar error before (sanity check)
+    // TODO: Consider sending out the world coodinates
+}
+
+/*
+void generate_scene_and_image(int N, double min_depth, double max_depth, double h_fov, bool planar, Camera* pose, Matrix<double, 2, Dynamic>* image_points1, Matrix<double, 2, Dynamic>* image_points2, double translation_scaling = 1.0) {
+
+	image_points1->resize(2, N);
+	image_points1->setRandom();
+	double max_coord = tan(h_fov / 2 * M_PI / 180);
+	(*image_points1) *= max_coord;
+
+    // Create world points
+    Eigen::Matrix<double, 3, Eigen::Dynamic> world_points;
+	world_points.resize(3, N);
+	world_points.block(0, 0, 2, N) = *image_points1;
+	world_points.block(2, 0, 1, N).setOnes();
 
 	Array<double, 1, Dynamic> depths(1, N);
 	depths.setRandom();
 	depths = (max_depth - min_depth) * (depths + 1.0) / 2.0 + min_depth;
 
 	for (int i = 0; i < N; ++i) {
-		(*world_points).col(i) *= depths(i);
+		world_points.col(i) *= depths(i);
 	}
 
 	if (planar) {
 		project_3d_points_to_plane(world_points);
 
 		// reproject the now planar 3D points
-		image_points->row(0) = world_points->row(0).array() / world_points->row(2).array();
-		image_points->row(1) = world_points->row(1).array() / world_points->row(2).array();
+		image_points1->row(0) = world_points.row(0).array() / world_points.row(2).array();
+		image_points1->row(1) = world_points.row(1).array() / world_points.row(2).array();
 	}
 
 	set_random_pose(pose, translation_scaling);
 
-	(*world_points).colwise() -= pose->t;
-	(*world_points) = pose->R.transpose() * (*world_points);
+	world_points.colwise() -= pose->t;
+	world_points = pose->R.transpose() * (*world_points);
+
+    
 }
+*/
 
 /* Adds focal length to the camera and image points.
   Note that the order of add_focal and add_distortion* matters! */
@@ -125,20 +177,6 @@ void add_distortion_1pdiv(double lambda, Camera* pose, Matrix<double, 2, Dynamic
 	pose->dist_params.clear();
 	pose->dist_params.push_back(lambda);
 	inverse_1param_division_model(lambda, *image_points, image_points);
-}
-
-/* Adds rational undistortion model to the camera and image points.
-  Note that the order of add_focal and add_distortion* matters! */
-void add_rational_undistortion(std::vector<double> params, int np, int nd, Camera* pose, Matrix<double, 2, Dynamic>* image_points) {
-	pose->dist_params = params;
-	inverse_rational_model(params, np, nd, *image_points, image_points);
-}
-
-/* Adds rational distortion model to the camera and image points.
-  Note that the order of add_focal and add_distortion* matters! */
-void add_rational_distortion(std::vector<double> params, int np, int nd, Camera* pose, Matrix<double, 2, Dynamic>* image_points) {
-	pose->dist_params = params;
-	forward_rational_model(params, np, nd, *image_points, image_points);
 }
 
 /* Adds random noise to the image points. */

@@ -25,11 +25,13 @@ include_directories(
 )
 
 set(SRCS
+    src/helpers/distortion.cpp
     src/helpers/normalize2dpts.cpp
     src/helpers/quartic.cpp
     src/helpers/radial.cpp
     src/helpers/triangulate.cpp
-    src/ransac/valtonenornhag_arxiv_2021.cpp
+    src/ransac/ransac_valtonenornhag_arxiv_2021.cpp
+    src/ransac/refinement.cpp
     src/solvers/valtonenornhag_arxiv_2021/fEf/get_fEf.cpp
     src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp
     src/solvers/valtonenornhag_arxiv_2021/frEfr/get_frEfr.cpp
