@@ -28,6 +28,10 @@
 // #include "refinement.hpp"
 
 
+
+// DEBUG
+#include <iostream>
+
 // TODO: Change name to reflect frEfr
 int DronePoseLib::ValtonenOrnhagArxiv2021::Solver::solve(
     DronePoseLib::Points2D &x1,
@@ -35,7 +39,13 @@ int DronePoseLib::ValtonenOrnhagArxiv2021::Solver::solve(
     const Eigen::Matrix3d &R1,
     const Eigen::Matrix3d &R2,
     std::vector<DronePoseLib::Camera>* poses) const {
-    // TODO: run solver
+
+    std::cout << "calling solve()" << std::endl;
+    std::cout << "R1 = " << R1 << std::endl;
+    std::cout << "R2 = " << R2 << std::endl;
+    std::cout << "x1 = " << x1 << std::endl;
+    std::cout << "x2 = " << x2 << std::endl;
+
     // TODO: Consider replaceing RelPose with Camera, and just call a computerFundamentalMatrix function.
     std::vector<DronePoseLib::RelPose> relpose = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, false);
 

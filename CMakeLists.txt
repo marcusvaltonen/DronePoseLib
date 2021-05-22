@@ -29,6 +29,7 @@ set(SRCS
     src/helpers/normalize2dpts.cpp
     src/helpers/quartic.cpp
     src/helpers/radial.cpp
+    src/helpers/scene_and_pose_generation.cpp
     src/helpers/triangulate.cpp
     src/ransac/ransac_valtonenornhag_arxiv_2021.cpp
     src/ransac/refinement.cpp

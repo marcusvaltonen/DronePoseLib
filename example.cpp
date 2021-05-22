@@ -131,6 +131,11 @@ int main() {
 	add_noise(0.5, &xx1);
 	add_noise(0.5, &xx2);
 
+    std::cout << "===  GT pose ===" << std::endl;
+    debug_print_pose(pose_gt);
+    std::cout << "x1 = \n" << x1 << std::endl;
+    std::cout << "x2 = \n" << x2 << std::endl;
+
     // We consider the relative pose problem
     R1.setIdentity();
     R2 = pose_gt.R;
