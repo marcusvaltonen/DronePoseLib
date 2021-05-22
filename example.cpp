@@ -26,17 +26,14 @@
 
 
 #define _USE_MATH_DEFINES
-#include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <limits>
 #include <RansacLib/ransac.h>
 
-#include <time.h>
 #include <cmath>
-#include <iostream>
 #include <numeric>
-//#include "radialpose.h"
 #include "ransac_estimator.hpp"
+#include "ransac_valtonenornhag_arxiv_2021.hpp"
 #include "scene_and_pose_generation.hpp"
 
 
@@ -44,7 +41,7 @@
 
 int main() {
     /* Timing experiments */
-    int nbr_iter = 1e4;
+    int nbr_iter = 1e2;
 
     // Test fEf
     int N = 3;
@@ -118,28 +115,27 @@ int main() {
     // Test RANSAC
 	std::cout << "Running RANSAC tests...\n\n";
 
-	Matrix<double, 2, Dynamic> x1;
-	Matrix<double, 2, Dynamic> x2;
+	Eigen::Matrix<double, 2, Eigen::Dynamic> xx1;
+	Eigen::Matrix<double, 2, Eigen::Dynamic> xx2;
 	DronePoseLib::Camera pose_gt;
 
 	double dist_param = -0.0000001;
 
     DronePoseLib::ValtonenOrnhagArxiv2021::Solver estimator;
 
-	generate_scene_and_image(100, 2, 20, 70, false, &pose_gt, &x1, &x2, 1.0);
-	add_focal(2000.0, &pose_gt, &x1);
-	add_focal(2000.0, &pose_gt, &x2);
-	add_distortion(dist_param, &pose_gt, &x1);
-	add_distortion(dist_param, &pose_gt, &x2);
-	add_noise(0.5, &x1);
-	add_noise(0.5, &x2);
+	generate_scene_and_image(100, 2, 20, 70, false, &pose_gt, &xx1, &xx2, 1.0);
+	add_focal(2000.0, &pose_gt, &xx1);
+	add_focal(2000.0, &pose_gt, &xx2);
+	add_distortion_1pdiv(dist_param, &pose_gt, &xx1);
+	add_distortion_1pdiv(dist_param, &pose_gt, &xx2);
+	add_noise(0.5, &xx1);
+	add_noise(0.5, &xx2);
 
     // We consider the relative pose problem
-    Eigen::Matrix3d R1;
     R1.setIdentity();
-    Eigen::Matrix3d R2 = pose_gt.R;
+    R2 = pose_gt.R;
 
-	DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(x1, x2, R1, R2, estimator);
+	DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator);
 
 	ransac_lib::LORansacOptions options;
 	options.squared_inlier_threshold_ = 4;

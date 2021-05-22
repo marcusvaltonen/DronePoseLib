@@ -5,6 +5,7 @@
 using namespace Eigen;
 using namespace DronePoseLib;
 
+// TODO: Probably do not want these static declared..
 static const double SMALL_NUMBER = 1e-8;
 static const double TOL_CONVERGENCE = 1e-10;
 static const double INITIAL_LM_DAMP = 1e-6;

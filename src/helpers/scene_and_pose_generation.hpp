@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #include "relpose.hpp"
 #include <Eigen/Dense>
+#include "distortion.hpp"
 
 #define FLIPPYBOOL(boolname) bool boolname = false; for(int o_##boolname = 0; o_##boolname < 2; ++o_##boolname, boolname = true)
 

@@ -133,13 +133,13 @@ public:
 		z2 = pose.focal * z2;
 
         // TODO: Should we compute it both ways?
-        // Maybe Take mean between z1-im1 and z2-im2
+        // Maybe Take mean/squared sum between z1-im1 and z2-im2
 		return (z2 - image_points2.col(i)).squaredNorm();
 	}
 
 	// Linear least squares solver. Calls NonMinimalSolver.
 	inline void LeastSquares(const std::vector<int>& sample,
-		Camera* p) const {
+		DronePoseLib::Camera* p) const {
 		if (!use_local_opt)
 			return;
 		Eigen::Matrix<double, 2, Eigen::Dynamic> p1(2, sample.size());
@@ -149,10 +149,16 @@ public:
 			p1.col(i) = image_points1.col(sample[i]);
 			p2.col(i) = image_points2.col(sample[i]);
 		}
-		solver.refine(*p, p1, p2);
+
+        // TODO: Refine both structure and motion?
+        // Right now this does not work..
+        // FIXME: This is just a dummy - refinement disabled
+		//solver.refine(*p, p1, p2);
+		Eigen::Matrix<double, 3, Eigen::Dynamic> dummy(3, sample.size());
+		solver.refine(*p, p1, dummy);
 	}
 	bool use_non_minimal = true;
-	bool use_local_opt = true;
+	bool use_local_opt = false;  // FIXME: This is temporarily disabled
 private:
 	Solver solver;
 	Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;
