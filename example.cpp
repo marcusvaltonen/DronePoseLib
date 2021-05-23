@@ -136,6 +136,15 @@ int main() {
     std::cout << "xx1 = \n" << xx1 << std::endl;
     std::cout << "xx2 = \n" << xx2 << std::endl;
 
+    // Outliers
+    for (int i = 0; i < 20; ++i) {
+		Vector2d n;
+        n.setRandom(); n *= 0.2 * pose_gt.focal;
+		xx1.col(i) += n;
+        n.setRandom(); n *= 0.2 * pose_gt.focal;
+		xx2.col(i) += n;
+	}
+
     // We consider the relative pose problem
     R1.setIdentity();
     R2 = pose_gt.R;
