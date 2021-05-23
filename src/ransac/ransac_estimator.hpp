@@ -123,11 +123,12 @@ public:
 
 	// Evaluates the line on the i:th data point
 	double EvaluateModelOnPoint(const Camera& pose, int i) const {
-        std::cout << "called EvaluateModelOnPoint(): " << i << std::endl;
+        //std::cout << "called EvaluateModelOnPoint(): " << i << std::endl;
         Eigen::Vector3d X;
         bool succ = DronePoseLib::triangulate(pose, image_points1.col(i), image_points2.col(i), &X);
 
         if (!succ) {
+            //std::cout << "no succ (f = " << pose.focal << ")"<< std::endl;
 		    return std::numeric_limits<double>::max();
         }
 
@@ -140,14 +141,16 @@ public:
         Eigen::Matrix<double, 2, Eigen::Dynamic> x2_p = pose.focal * X.hnormalized();
         DronePoseLib::inverse_1param_division_model(pose.dist_params[0], x2_p, &x2_p);
 
+        /*
         std::cout << "x1 =\n" << image_points1.col(i) << std::endl;
         std::cout << "x1_p =\n" << x1_p << std::endl;
         std::cout << "x2 =\n" << image_points2.col(i) << std::endl;
         std::cout << "x2_p =\n" << x2_p << std::endl;
+        */
 
-        // TODO: Should we compute it both ways?
-        // Maybe Take mean/squared sum between z1-im1 and z2-im2
-		return (x2_p - image_points2.col(i)).squaredNorm();
+		double val = (x1_p - image_points1.col(i)).squaredNorm() + (x2_p - image_points2.col(i)).squaredNorm();
+        //std::cout << "val = " << val << "(f = " << pose.focal << ")"<< std::endl;
+        return val;
 	}
 
 	// Linear least squares solver. Calls NonMinimalSolver.

@@ -54,11 +54,16 @@ double minimum_pose_distance(Camera pose_gt, std::vector<Camera> poses, bool com
 
 
 void set_random_pose(Camera* pose, double translation_scaling) {
-	Quaterniond qq = Quaterniond::UnitRandom();
+	//Quaterniond qq = Quaterniond::UnitRandom();
+    Matrix3d R;
+    R = Eigen::AngleAxisd(0.025*M_PI, Eigen::Vector3d::UnitX())
+      * Eigen::AngleAxisd(0.05*M_PI,  Eigen::Vector3d::UnitY())
+      * Eigen::AngleAxisd(0.033*M_PI, Eigen::Vector3d::UnitZ());
 	Vector3d t;
 	t.setRandom();
 	t *= translation_scaling;
-	pose->R = qq.toRotationMatrix();
+	//pose->R = qq.toRotationMatrix();
+	pose->R = R;
 	if (pose->R.determinant() < 0)
 		pose->R *= -1.0;
 	pose->t = t;
@@ -106,6 +111,10 @@ void generate_scene_and_image(int N, double min_depth, double max_depth, double 
 	for (int i = 0; i < N; ++i) {
 		world_points.col(i) *= depths(i);
 	}
+
+    cout << "world points=\n" << world_points << endl;
+
+
     /*
 	if (planar) {
 		project_3d_points_to_plane(world_points);
