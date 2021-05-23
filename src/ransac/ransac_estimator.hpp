@@ -22,6 +22,7 @@
 #define SRC_RANSAC_RANSAC_ESTIMATOR_HPP_
 
 #include <Eigen/Dense>
+#include "distortion.hpp"
 #include "relpose.hpp"
 #include "pose_estimator.hpp"
 #include "triangulate.hpp"
@@ -126,27 +127,27 @@ public:
         Eigen::Vector3d X;
         bool succ = DronePoseLib::triangulate(pose, image_points1.col(i), image_points2.col(i), &X);
 
+        if (!succ) {
+		    return std::numeric_limits<double>::max();
+        }
+
+        // Measure distance in distorted space
+        // TODO: Make distortion accept Vector2d as well
+        Eigen::Matrix<double, 2, Eigen::Dynamic> x1_p = pose.focal * X.hnormalized();
+        DronePoseLib::inverse_1param_division_model(pose.dist_params[0], x1_p, &x1_p);
+
+        X = pose.R * X + pose.t;
+        Eigen::Matrix<double, 2, Eigen::Dynamic> x2_p = pose.focal * X.hnormalized();
+        DronePoseLib::inverse_1param_division_model(pose.dist_params[0], x2_p, &x2_p);
+
         std::cout << "x1 =\n" << image_points1.col(i) << std::endl;
+        std::cout << "x1_p =\n" << x1_p << std::endl;
         std::cout << "x2 =\n" << image_points2.col(i) << std::endl;
-        std::cout << "triangulate: succ" << succ << std::endl;
-        std::cout << "triangulate: X = \n" << X << std::endl;
-
-		// Compute reprojected point in first camera
-		Eigen::Matrix<double, 2, Eigen::Dynamic> z1(2, 1);
-		z1 << X(0) / X(2), X(1) / X(2);
-		solver.distort(pose.dist_params, z1, &z1);
-		z1 = pose.focal * z1;
-
-		// Compute reprojected point in second camera
-		Eigen::Vector3d Z2 = pose.R * X + pose.t;
-		Eigen::Matrix<double, 2, Eigen::Dynamic> z2(2, 1);
-		z1 << Z2(0) / Z2(2), Z2(1) / Z2(2);
-		solver.distort(pose.dist_params, z2, &z2);
-		z2 = pose.focal * z2;
+        std::cout << "x2_p =\n" << x2_p << std::endl;
 
         // TODO: Should we compute it both ways?
         // Maybe Take mean/squared sum between z1-im1 and z2-im2
-		return (z2 - image_points2.col(i)).squaredNorm();
+		return (x2_p - image_points2.col(i)).squaredNorm();
 	}
 
 	// Linear least squares solver. Calls NonMinimalSolver.
