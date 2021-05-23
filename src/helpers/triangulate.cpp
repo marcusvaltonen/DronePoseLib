@@ -23,9 +23,6 @@
 #include "distortion.hpp"
 #include "relpose.hpp"
 
-//DEBUG
-#include <iostream>
-
 namespace DronePoseLib {
 bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vector2d& p2, Eigen::Vector3d *t) {
 
@@ -36,11 +33,8 @@ bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vec
     x1 /= pose.focal;
     x2 /= pose.focal;
 
-    std::cout << "x1 = \n" << x1 << std::endl;
-    std::cout << "x2 = \n" << x2 << std::endl;
-
     // First pose is assumed to be the identity
-    // TODO: Fixed 6x6
+    // TODO: Fixed 6x6?
     Eigen::MatrixXd M(6, 6);
     M.setZero();
     M.topLeftCorner(3, 3).setIdentity();
@@ -51,12 +45,9 @@ bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vec
     M.block(3, 5, 2, 1) = -x2;
     M(5, 5) = -1;
 
-    std::cout << "M = \n" << M << std::endl;
-
     // Extract solution via SVD
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(M, Eigen::ComputeFullV);
     Eigen::Matrix<double, 6, 6> Q = svd.matrixV();
-    std::cout << "Q = \n" << Q << std::endl;
 	(*t) = Q.block(0, 5, 3, 1) / Q(3, 5);
 
     // Check if point is in front of the camera
