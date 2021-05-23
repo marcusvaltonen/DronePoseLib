@@ -18,14 +18,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef SRC_HELPERS_TRIANGULATE_HPP_
-#define SRC_HELPERS_TRIANGULATE_HPP_
-
 #include <Eigen/Dense>
+#include <catch2/catch.hpp>
+#include "get_valtonenornhag_arxiv_2021.hpp"
 #include "relpose.hpp"
+#include "triangulate.hpp"
 
-namespace DronePoseLib {
-  bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vector2d& p2, Eigen::Vector3d *t);
+TEST_CASE("triangulate") {
+    DronePoseLib::Camera pose;
+    pose.R <<
+       0.114117755567683,   0.720696770083189,  -0.683793319253599,
+      -0.416731265253450,   0.659533743021984,   0.625579966411706,
+       0.901838228522418,   0.213568273409398,   0.375601387335664;
+    pose.t <<
+          394.963979386373,
+          310.693571838401,
+         -1461.80694350949;
+    pose.focal = 0.673139392770936;
+    pose.dist_params.push_back(-0.00425062473859951);
+
+    Eigen::Vector2d p1;
+    p1 << 2.76452368277409,
+          13.8755682729254;
+    Eigen::Vector2d p2;
+    p2 << 0.984409768200559,
+          7.54701555819437;
+
+    // Triangulate
+    Eigen::Vector3d X;
+    bool succ = triangulate(pose, p1, p2, &X);
+
+    // Test output
+    double tol = 1e-12;
+    Eigen::Vector3d expected;
+    expected << 324.525725801189,
+                5837.4883872621,
+                2298.86986335411;
+
+    REQUIRE(succ);
+    REQUIRE(X.isApprox(expected, tol));
 }
-
-#endif  // SRC_HELPERS_TRIANGULATE_HPP_

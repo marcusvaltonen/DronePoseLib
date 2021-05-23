@@ -29,6 +29,10 @@
 // TODO: No const& declaration as input to class? Check guidelines
 // NOTE: Points2D is optimal for up to 8 (non-minimal).
 
+
+//DEBUG
+#include <iostream>
+
 namespace DronePoseLib {
 template<class Solver>
 class RansacEstimator {
@@ -59,6 +63,7 @@ public:
 
 	int MinimalSolver(const std::vector<int>& sample,
 		std::vector<Camera>* poses) const {
+        std::cout << "called MinimalSolver()" << std::endl;
 		Points2D p1(2, sample.size());
 		Points2D p2(2, sample.size());
 
@@ -74,6 +79,7 @@ public:
 	// Returns 0 if no model could be estimated and 1 otherwise.
 	int NonMinimalSolver(const std::vector<int>& sample,
 		Camera* pose) const {
+        std::cout << "called NonMinimalSolver()" << std::endl;
 		if (!use_non_minimal)
 			return 0;
 
@@ -97,8 +103,9 @@ public:
 
 		for (int i = 0; i < poses.size(); ++i) {
 			double score = 0;
-			for (int j = 0; j < sample.size(); ++j)
+			for (int j = 0; j < sample.size(); ++j) {
 				score += EvaluateModelOnPoint(poses[i], sample[j]);
+            }
 			if (score < best_score) {
 				best_score = score;
 				best_idx = i;
@@ -115,9 +122,14 @@ public:
 
 	// Evaluates the line on the i:th data point
 	double EvaluateModelOnPoint(const Camera& pose, int i) const {
-        // TODO: Triangualte points (relative pose - first pose is normalized)
-        // TODO: Radial undistort first.
-        Eigen::Vector3d X = DronePoseLib::triangulate(pose, image_points1.col(i), image_points2.col(i));
+        std::cout << "called EvaluateModelOnPoint(): " << i << std::endl;
+        Eigen::Vector3d X;
+        bool succ = DronePoseLib::triangulate(pose, image_points1.col(i), image_points2.col(i), &X);
+
+        std::cout << "x1 =\n" << image_points1.col(i) << std::endl;
+        std::cout << "x2 =\n" << image_points2.col(i) << std::endl;
+        std::cout << "triangulate: succ" << succ << std::endl;
+        std::cout << "triangulate: X = \n" << X << std::endl;
 
 		// Compute reprojected point in first camera
 		Eigen::Matrix<double, 2, Eigen::Dynamic> z1(2, 1);
@@ -140,6 +152,7 @@ public:
 	// Linear least squares solver. Calls NonMinimalSolver.
 	inline void LeastSquares(const std::vector<int>& sample,
 		DronePoseLib::Camera* p) const {
+        std::cout << "called LeastSquares()" << std::endl;
 		if (!use_local_opt)
 			return;
 		Eigen::Matrix<double, 2, Eigen::Dynamic> p1(2, sample.size());

@@ -20,17 +20,48 @@
 
 #include "triangulate.hpp"
 #include <Eigen/Dense>
+#include "distortion.hpp"
 #include "relpose.hpp"
 
+//DEBUG
+#include <iostream>
+
 namespace DronePoseLib {
-Eigen::Vector3d triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vector2d& p2) {
+bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vector2d& p2, Eigen::Vector3d *t) {
+
+    // Normalize points
+    Eigen::Matrix<double, 2, Eigen::Dynamic> x1, x2;
+    DronePoseLib::forward_1param_division_model(pose.dist_params[0], p1, &x1);
+    DronePoseLib::forward_1param_division_model(pose.dist_params[0], p2, &x2);
+    x1 /= pose.focal;
+    x2 /= pose.focal;
+
+    std::cout << "x1 = \n" << x1 << std::endl;
+    std::cout << "x2 = \n" << x2 << std::endl;
+
     // First pose is assumed to be the identity
+    // TODO: Fixed 6x6
     Eigen::MatrixXd M(6, 6);
+    M.setZero();
+    M.topLeftCorner(3, 3).setIdentity();
+    M.bottomLeftCorner(3, 3) = pose.R;
+    M.block(3, 3, 3, 1) = pose.t;
+    M.block(0, 4, 2, 1) = -x1;
+    M(2, 4) = -1;
+    M.block(3, 5, 2, 1) = -x2;
+    M(5, 5) = -1;
 
-    // TODO: Implement this
-    Eigen::Vector3d t;
-    t.setZero();
+    std::cout << "M = \n" << M << std::endl;
 
-    return t;
+    // Extract solution via SVD
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(M, Eigen::ComputeFullV);
+    Eigen::Matrix<double, 6, 6> Q = svd.matrixV();
+    std::cout << "Q = \n" << Q << std::endl;
+	(*t) = Q.block(0, 5, 3, 1) / Q(3, 5);
+
+    // Check if point is in front of the camera
+    bool succ = Q(4,5) / Q(3,5) > 0 && Q(5,5) / Q(3,5) > 0;
+
+    return succ;
 }
 }

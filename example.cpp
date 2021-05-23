@@ -133,8 +133,8 @@ int main() {
 
     std::cout << "===  GT pose ===" << std::endl;
     debug_print_pose(pose_gt);
-    std::cout << "x1 = \n" << x1 << std::endl;
-    std::cout << "x2 = \n" << x2 << std::endl;
+    std::cout << "xx1 = \n" << xx1 << std::endl;
+    std::cout << "xx2 = \n" << xx2 << std::endl;
 
     // We consider the relative pose problem
     R1.setIdentity();

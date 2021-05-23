@@ -107,6 +107,11 @@ namespace ValtonenOrnhagArxiv2021 {
                 f = sols(0, i).real();
                 r = sols(1, i).real();
 
+                // Discard negative focal length and positive radial distortion coefficient
+                if (f < 0 || r > 0) {
+                    continue;
+                }
+
                 // Extract translation
                 relpose.t = extract_translation(f, r, R1, R2, x1t.leftCols<2>(), x2t.leftCols<2>());
                 relpose.f = f / scale;

@@ -31,6 +31,8 @@
 
 // DEBUG
 #include <iostream>
+#include "scene_and_pose_generation.hpp"
+
 
 // TODO: Change name to reflect frEfr
 int DronePoseLib::ValtonenOrnhagArxiv2021::Solver::solve(
@@ -49,6 +51,8 @@ int DronePoseLib::ValtonenOrnhagArxiv2021::Solver::solve(
     // TODO: Consider replaceing RelPose with Camera, and just call a computerFundamentalMatrix function.
     std::vector<DronePoseLib::RelPose> relpose = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, false);
 
+    std::cout << "nbr poses = " << relpose.size() << std::endl;
+
     // TODO: Consider saving the relative pose early on and send it in instead
     for (int i=0; i < relpose.size(); i++) {
         DronePoseLib::Camera p;
@@ -56,6 +60,9 @@ int DronePoseLib::ValtonenOrnhagArxiv2021::Solver::solve(
         p.t = relpose[i].t;
         p.focal = relpose[i].f;
         p.dist_params.push_back(relpose[i].r);
+
+        std::cout << "nbr  = " << i << std::endl;
+        debug_print_pose(p);
         poses->push_back(p);
     }
 
