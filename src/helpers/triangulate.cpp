@@ -48,7 +48,7 @@ bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vec
     // Extract solution via SVD
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(M, Eigen::ComputeFullV);
     Eigen::Matrix<double, 6, 6> Q = svd.matrixV();
-	(*t) = Q.block(0, 5, 3, 1) / Q(3, 5);
+    (*t) = Q.block(0, 5, 3, 1) / Q(3, 5);
 
     // Check if point is in front of the camera
     bool succ = Q(4,5) / Q(3,5) > 0 && Q(5,5) / Q(3,5) > 0;

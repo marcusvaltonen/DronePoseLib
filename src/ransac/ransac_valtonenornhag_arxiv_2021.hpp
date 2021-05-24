@@ -43,7 +43,6 @@ class Solver : public PoseEstimator<Solver> {
         int minimal_sample_size() const {
             return 4;
         }
-        // TODO: Use Points2d typedef..
         inline void distort(
             const std::vector<double>& dist_params, const Eigen::Matrix<double, 2, Eigen::Dynamic> xu, Eigen::Matrix<double, 2, Eigen::Dynamic>* xd) const {
             inverse_1param_division_model(dist_params[0], xu, xd);
