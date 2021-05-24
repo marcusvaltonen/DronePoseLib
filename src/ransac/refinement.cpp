@@ -19,10 +19,6 @@ static const int MAX_ITER = 10;
 
 */
 
-
-//DEBUG
-#include <iostream>
-
 inline void drot(const Matrix3d &R, Matrix3d *dr1, Matrix3d *dr2, Matrix3d *dr3) {
     // skew = [0 -v(2) v(1); v(2) 0 -v(0); -v(1) v(0) 0]
 
@@ -185,12 +181,12 @@ void DronePoseLib::refinement_dist(const Eigen::Matrix<double, 2, Eigen::Dynamic
         if (g.cwiseAbs().maxCoeff() < TOL_CONVERGENCE)
             break;
 
-        std::cout << "iter=" << iter << " res=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
+        // std::cout << "iter=" << iter << " res=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
         //std::cout << res << "\n";
 
         dx = H.ldlt().solve(g);
 
-        std::cout << "dx =\n" << dx << "\n";
+        // std::cout << "dx =\n" << dx << "\n";
 
         Vector3d dx_r = dx.block<3, 1>(0, 0);
         update_rot(dx_r, p.R);
@@ -336,12 +332,12 @@ void DronePoseLib::refinement_undist(const Eigen::Matrix<double, 2, Eigen::Dynam
         if (g.cwiseAbs().maxCoeff() < TOL_CONVERGENCE)
             break;
 
-        std::cout << "iter=" << iter << " res=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
+        // std::cout << "iter=" << iter << " res=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
         //std::cout << res << "\n";
         //std::cout << J << "\n";
 
         dx = H.ldlt().solve(g);
-        std::cout << "dx =\n"<< dx << "\n";
+        // std::cout << "dx =\n"<< dx << "\n";
 
         Vector3d dx_r = dx.block<3, 1>(0, 0);
         update_rot(dx_r, p.R);
@@ -361,7 +357,7 @@ void DronePoseLib::refinement_undist(const Eigen::Matrix<double, 2, Eigen::Dynam
         lm_damp = std::max(1e-8, lm_damp / 10.0);
     }
 
-    std::cout << "Local opt finished. iter=" << iter << ", res=" << res.norm() << ", g=" << g.norm() << "\n";
+    // std::cout << "Local opt finished. iter=" << iter << ", res=" << res.norm() << ", g=" << g.norm() << "\n";
 
     // Revert change of variables
     f2 = p.focal * p.focal;
@@ -535,7 +531,7 @@ void DronePoseLib::refinement_undist_with_structure(const Eigen::Matrix<double, 
         if (g.cwiseAbs().maxCoeff() < TOL_CONVERGENCE)
             break;
 
-        std::cout << "iter=" << iter << " res=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
+        // std::cout << "iter=" << iter << " res=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
         //std::cout << res << "\n";
         // std::cout << "J =\n" << J << "\n";
 
@@ -560,7 +556,7 @@ void DronePoseLib::refinement_undist_with_structure(const Eigen::Matrix<double, 
         lm_damp = std::max(1e-8, lm_damp / 10.0);
     }
 
-    std::cout << "Local opt finished. iter=" << iter << ", res=" << res.norm() << ", g=" << g.norm() << "\n";
+    // std::cout << "Local opt finished. iter=" << iter << ", res=" << res.norm() << ", g=" << g.norm() << "\n";
 
     // Revert change of variables
     f2 = p.focal * p.focal;

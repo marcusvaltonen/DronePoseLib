@@ -65,7 +65,6 @@ public:
 
 	int MinimalSolver(const std::vector<int>& sample,
 		std::vector<Camera>* poses) const {
-        std::cout << "called MinimalSolver()" << std::endl;
 		Points2D p1(2, sample.size());
 		Points2D p2(2, sample.size());
 
@@ -81,7 +80,6 @@ public:
 	// Returns 0 if no model could be estimated and 1 otherwise.
 	int NonMinimalSolver(const std::vector<int>& sample,
 		Camera* pose) const {
-        std::cout << "called NonMinimalSolver()" << std::endl;
 		if (!use_non_minimal)
 			return 0;
 
@@ -124,12 +122,10 @@ public:
 
 	// Evaluates the line on the i:th data point
 	double EvaluateModelOnPoint(const Camera& pose, int i) const {
-        //std::cout << "called EvaluateModelOnPoint(): " << i << std::endl;
         Eigen::Vector3d X;
         bool succ = DronePoseLib::triangulate(pose, image_points1.col(i), image_points2.col(i), &X);
 
         if (!succ) {
-            //std::cout << "no succ (f = " << pose.focal << ")"<< std::endl;
 		    return std::numeric_limits<double>::max();
         }
 
@@ -142,31 +138,18 @@ public:
         Eigen::Matrix<double, 2, Eigen::Dynamic> x2_p = pose.focal * X.hnormalized();
         DronePoseLib::inverse_1param_division_model(pose.dist_params[0], x2_p, &x2_p);
 
-        /*
-        std::cout << "x1 =\n" << image_points1.col(i) << std::endl;
-        std::cout << "x1_p =\n" << x1_p << std::endl;
-        std::cout << "x2 =\n" << image_points2.col(i) << std::endl;
-        std::cout << "x2_p =\n" << x2_p << std::endl;
-        */
-
 		double val = (x1_p - image_points1.col(i)).squaredNorm() + (x2_p - image_points2.col(i)).squaredNorm();
-        //std::cout << "val = " << val << "(f = " << pose.focal << ")"<< std::endl;
         return val;
 	}
 
 	// Linear least squares solver. Calls NonMinimalSolver.
 	inline void LeastSquares(const std::vector<int>& sample,
 		DronePoseLib::Camera* p) const {
-        std::cout << "called LeastSquares()" << std::endl;
-        std::cout << "pose before\n";
-        debug_print_pose(*p);
 		if (!use_local_opt)
 			return;
 		Eigen::Matrix<double, 2, Eigen::Dynamic> p1(2, sample.size());
 		Eigen::Matrix<double, 2, Eigen::Dynamic> p2(2, sample.size());
 		Eigen::Matrix<double, 3, Eigen::Dynamic> X(3, sample.size());
-
-        // tmp
         Eigen::Vector3d Xi;
 
 		for (int i = 0; i < sample.size(); i++) {
@@ -177,27 +160,16 @@ public:
             X.col(i) = Xi;
 
             if (!succ) {
-                // Do nothing?
-                //std::cout << "no succ (f = " << pose.focal << ")"<< std::endl;
-                //return std::numeric_limits<double>::max();
+                // TODO: Do nothing?
             }
 		}
 
-        // TODO: Refine both structure and motion?
-        // Right now this does not work..
-
-
+        // TODO: Refine both p1 and p2 simultaneously?
 		solver.refine(*p, p2, X);
-
-        std::cout << "pose after\n";
-        debug_print_pose(*p);
-
-        // FIXME: This is just a dummy - refinement disabled
-		//Eigen::Matrix<double, 3, Eigen::Dynamic> dummy(3, sample.size());
-		//solver.refine(*p, p1, dummy);
 	}
-	bool use_non_minimal = true;
-	bool use_local_opt = true;  // TODO: temp
+
+	bool use_non_minimal = false; // true;
+	bool use_local_opt = false;  // true;
 private:
 	Solver solver;
 	Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;

@@ -24,14 +24,6 @@
 #include "pose_estimator.hpp"
 #include "get_valtonenornhag_arxiv_2021.hpp"
 #include "relpose.hpp"
-// #include "distortion.hpp"
-// #include "refinement.hpp"
-
-
-
-// DEBUG
-#include <iostream>
-#include "scene_and_pose_generation.hpp"
 
 
 // TODO: Change name to reflect frEfr
@@ -42,29 +34,17 @@ int DronePoseLib::ValtonenOrnhagArxiv2021::Solver::solve(
     const Eigen::Matrix3d &R2,
     std::vector<DronePoseLib::Camera>* poses) const {
 
-    /*
-    std::cout << "calling solve()" << std::endl;
-    std::cout << "R1 = " << R1 << std::endl;
-    std::cout << "R2 = " << R2 << std::endl;
-    std::cout << "x1 = " << x1 << std::endl;
-    std::cout << "x2 = " << x2 << std::endl;
-    */
-
-    // TODO: Consider replaceing RelPose with Camera, and just call a computerFundamentalMatrix function.
-    std::vector<DronePoseLib::RelPose> relpose = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, false);
-
-    //std::cout << "nbr poses = " << relpose.size() << std::endl;
+    // TODO: Consider replacing RelPose with Camera, and just call a computerFundamentalMatrix function.
+    std::vector<DronePoseLib::RelPose> relpose = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, true);
 
     // TODO: Consider saving the relative pose early on and send it in instead
+    Eigen::Matrix3d R = R2 * R1.transpose();
     for (int i=0; i < relpose.size(); i++) {
         DronePoseLib::Camera p;
-        p.R = R2 * R1.transpose();
+        p.R = R;
         p.t = relpose[i].t;
         p.focal = relpose[i].f;
         p.dist_params.push_back(relpose[i].r);
-
-        //std::cout << "nbr  = " << i << std::endl;
-        //debug_print_pose(p);
         poses->push_back(p);
     }
 

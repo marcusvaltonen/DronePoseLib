@@ -97,7 +97,6 @@ void generate_scene_and_image(int N, double min_depth, double max_depth, double 
 	double max_coord = tan(h_fov / 2 * M_PI / 180);
 
     // Create world points
-    cout << "in here!" << endl;
     Eigen::Matrix<double, 3, Eigen::Dynamic> world_points;
 	world_points.resize(3, N);
 	world_points.block(0, 0, 2, N).setRandom();
@@ -113,9 +112,6 @@ void generate_scene_and_image(int N, double min_depth, double max_depth, double 
 		world_points.col(i) *= depths(i);
 	}
 
-    cout << "world points=\n" << world_points << endl;
-
-
     /*
 	if (planar) {
 		project_3d_points_to_plane(world_points);
@@ -128,25 +124,16 @@ void generate_scene_and_image(int N, double min_depth, double max_depth, double 
 
     // Get a random (relative) pose
 	set_random_pose(pose, translation_scaling);
-    cout << "random pose ok!" << endl;
 
     // First camera is assumed to be [I 0]
     image_points1->row(0) = world_points.row(0).array() / world_points.row(2).array();
     image_points1->row(1) = world_points.row(1).array() / world_points.row(2).array();
-    cout << "first cam ok!" << endl;
 
     // Second camera is assumed to be [R t]
-    cout << "shifting..." << endl;
     world_points = pose->R * world_points;
     world_points.colwise() += pose->t;
-    cout << "shifting ok!" << endl;
     image_points2->row(0) = world_points.row(0).array() / world_points.row(2).array();
     image_points2->row(1) = world_points.row(1).array() / world_points.row(2).array();
-    cout << "second cam ok!" << endl;
-
-    // TODO: Check epipolar error before (sanity check)
-    // TODO: Consider sending out the world coodinates
-    cout << "scene generation ok!" << endl;
 }
 
 /* Adds focal length to the camera and image points.

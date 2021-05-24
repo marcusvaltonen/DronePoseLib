@@ -37,8 +37,6 @@
 #include "scene_and_pose_generation.hpp"
 
 
-
-
 int main() {
     /* Timing experiments */
     int nbr_iter = 1e2;
@@ -131,11 +129,6 @@ int main() {
 	add_noise(0.5, &xx1);
 	add_noise(0.5, &xx2);
 
-    std::cout << "===  GT pose ===" << std::endl;
-    debug_print_pose(pose_gt);
-    std::cout << "xx1 = \n" << xx1 << std::endl;
-    std::cout << "xx2 = \n" << xx2 << std::endl;
-
     // Outliers
     for (int i = 0; i < 20; ++i) {
 		Vector2d n;
@@ -153,8 +146,12 @@ int main() {
 
 	DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator);
 
+    // RANSAC parmeters
 	ransac_lib::LORansacOptions options;
 	options.squared_inlier_threshold_ = 1;
+	options.success_probability_ = 0.99;
+    options.min_num_iterations_ = 40u;
+    options.max_num_iterations_ = 200u;
     std::random_device rand_dev;
     options.random_seed_ = rand_dev();
 
@@ -166,7 +163,19 @@ int main() {
 	ransac_lib::RansacStatistics ransac_stats;
 
 	DronePoseLib::Camera best_model;
-	int num_ransac_inliers = lomsac.EstimateModel(options, solver, &best_model, &ransac_stats);
+    start = std::chrono::steady_clock::now();
+
+    nbr_iter = 10;
+
+    int num_ransac_inliers;
+    for (int i = 0; i < nbr_iter; i++) {
+	    num_ransac_inliers = lomsac.EstimateModel(options, solver, &best_model, &ransac_stats);
+    }
+    end = std::chrono::steady_clock::now();
+
+    std::cout << "Elapsed time (RANSAC frEfr): "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / nbr_iter
+        << " ms" << std::endl;
 
 	std::cout << "   ... LOMSAC found " << num_ransac_inliers
 		<< " inliers in " << ransac_stats.num_iterations
