@@ -123,7 +123,7 @@ int main() {
 
     DronePoseLib::ValtonenOrnhagArxiv2021::Solver estimator;
 
-	generate_scene_and_image(100, 2, 20, 70, false, &pose_gt, &xx1, &xx2, 1.0);
+	generate_scene_and_image(100, 2, 10, 70, false, &pose_gt, &xx1, &xx2, 1.0);
 	add_focal(2000.0, &pose_gt, &xx1);
 	add_focal(2000.0, &pose_gt, &xx2);
 	add_distortion_1pdiv(dist_param, &pose_gt, &xx1);
@@ -139,9 +139,11 @@ int main() {
     // Outliers
     for (int i = 0; i < 20; ++i) {
 		Vector2d n;
-        n.setRandom(); n *= 0.2 * pose_gt.focal;
+        n.setRandom();
+        n *= 0.2 * pose_gt.focal;
 		xx1.col(i) += n;
-        n.setRandom(); n *= 0.2 * pose_gt.focal;
+        n.setRandom();
+        n *= 0.2 * pose_gt.focal;
 		xx2.col(i) += n;
 	}
 
@@ -152,7 +154,9 @@ int main() {
 	DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator);
 
 	ransac_lib::LORansacOptions options;
-	options.squared_inlier_threshold_ = 4;
+	options.squared_inlier_threshold_ = 1;
+    std::random_device rand_dev;
+    options.random_seed_ = rand_dev();
 
 	ransac_lib::LocallyOptimizedMSAC<
         DronePoseLib::Camera,
@@ -169,6 +173,10 @@ int main() {
 		<< " iterations with an inlier ratio of "
 		<< ransac_stats.inlier_ratio << std::endl;
 
+    std::cout << "GT\n";
+    debug_print_pose(pose_gt, true);
+    std::cout << "Est\n";
+    debug_print_pose(best_model, true);
 
     return 0;
 }

@@ -33,6 +33,7 @@
 
 //DEBUG
 #include <iostream>
+#include "scene_and_pose_generation.hpp"
 
 namespace DronePoseLib {
 template<class Solver>
@@ -157,25 +158,46 @@ public:
 	inline void LeastSquares(const std::vector<int>& sample,
 		DronePoseLib::Camera* p) const {
         std::cout << "called LeastSquares()" << std::endl;
+        std::cout << "pose before\n";
+        debug_print_pose(*p);
 		if (!use_local_opt)
 			return;
 		Eigen::Matrix<double, 2, Eigen::Dynamic> p1(2, sample.size());
 		Eigen::Matrix<double, 2, Eigen::Dynamic> p2(2, sample.size());
+		Eigen::Matrix<double, 3, Eigen::Dynamic> X(3, sample.size());
+
+        // tmp
+        Eigen::Vector3d Xi;
 
 		for (int i = 0; i < sample.size(); i++) {
 			p1.col(i) = image_points1.col(sample[i]);
 			p2.col(i) = image_points2.col(sample[i]);
+
+            bool succ = DronePoseLib::triangulate(*p, p1.col(i), p2.col(i), &Xi);
+            X.col(i) = Xi;
+
+            if (!succ) {
+                // Do nothing?
+                //std::cout << "no succ (f = " << pose.focal << ")"<< std::endl;
+                //return std::numeric_limits<double>::max();
+            }
 		}
 
         // TODO: Refine both structure and motion?
         // Right now this does not work..
+
+
+		solver.refine(*p, p2, X);
+
+        std::cout << "pose after\n";
+        debug_print_pose(*p);
+
         // FIXME: This is just a dummy - refinement disabled
-		//solver.refine(*p, p1, p2);
-		Eigen::Matrix<double, 3, Eigen::Dynamic> dummy(3, sample.size());
-		solver.refine(*p, p1, dummy);
+		//Eigen::Matrix<double, 3, Eigen::Dynamic> dummy(3, sample.size());
+		//solver.refine(*p, p1, dummy);
 	}
 	bool use_non_minimal = true;
-	bool use_local_opt = false;  // FIXME: This is temporarily disabled
+	bool use_local_opt = true;  // TODO: temp
 private:
 	Solver solver;
 	Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;

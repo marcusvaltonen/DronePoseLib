@@ -50,7 +50,9 @@ class Solver : public PoseEstimator<Solver> {
         }
 
         inline void refine(Camera &pose, const Eigen::Matrix<double, 2, Eigen::Dynamic> &x, const Eigen::Matrix<double, 3, Eigen::Dynamic> &X) const {
-            DronePoseLib::refinement_undist(x, X, pose, 0, 1);
+            pose.dist_params[0] = pose.dist_params[0] * pose.focal * pose.focal;
+            DronePoseLib::refinement_undist_with_structure(x, X, pose, 0, 1);
+            pose.dist_params[0] = pose.dist_params[0] / pose.focal / pose.focal;
         }
     };
 };  // ValtonenOrnhagArxiv2021

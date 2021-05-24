@@ -56,6 +56,7 @@ double minimum_pose_distance(Camera pose_gt, std::vector<Camera> poses, bool com
 void set_random_pose(Camera* pose, double translation_scaling) {
 	//Quaterniond qq = Quaterniond::UnitRandom();
     Matrix3d R;
+    // TODO: Randomize
     R = Eigen::AngleAxisd(0.025*M_PI, Eigen::Vector3d::UnitX())
       * Eigen::AngleAxisd(0.05*M_PI,  Eigen::Vector3d::UnitY())
       * Eigen::AngleAxisd(0.033*M_PI, Eigen::Vector3d::UnitZ());
@@ -183,9 +184,15 @@ void debug_print_poses(Camera pose_gt, std::vector<Camera> poses) {
 	}
 }
 
-void debug_print_pose(Camera pose) {
+void debug_print_pose(Camera pose, bool relative) {
 	std::cout << "R: " << pose.R << "\n";
-	std::cout << "t:" << pose.t << "\n";
+    Vector3d t = pose.t;
+
+    if (relative) {
+        t /= t.norm();
+    }
+
+	std::cout << "t:" << t << "\n";
 	std::cout << "f:" << pose.focal << "\n";
 	for (int j = 0; j < pose.dist_params.size(); j++) {
 		std::cout << "d[" << j << "]:" << pose.dist_params[j] << "\n";

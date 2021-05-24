@@ -38,4 +38,4 @@ void add_distortion_1pdiv(double lambda, Camera* pose, Matrix<double, 2, Dynamic
 void add_noise(double sigma, Matrix<double, 2, Dynamic>* image_points);
 
 void debug_print_poses(Camera pose_gt, std::vector<Camera> poses);
-void debug_print_pose(Camera pose);
+void debug_print_pose(Camera pose, bool relative = false);
