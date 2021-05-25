@@ -104,7 +104,7 @@ install:
 
 script:
   - ./build.sh
-  - >
+  - |
     cpplint \
     --linelength=119 \
     --verbose=1 \
