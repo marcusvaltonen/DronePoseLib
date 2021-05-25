@@ -166,8 +166,8 @@ public:
         solver.refine(*p, p1, p2, X);
     }
 
-    bool use_non_minimal = true; // true;
-    bool use_local_opt = true;  // true;
+    bool use_non_minimal = true;
+    bool use_local_opt = true;
 private:
     Solver solver;
     Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;

@@ -26,7 +26,6 @@
 #include "distortion.hpp"
 #include "refinement.hpp"
 
-
 // TODO: Change name to reflect frEfr
 namespace DronePoseLib {
 namespace ValtonenOrnhagArxiv2021 {
@@ -52,7 +51,7 @@ class Solver : public PoseEstimator<Solver> {
             Camera &pose,
             const Eigen::Matrix<double, 2, Eigen::Dynamic> &x1,
             const Eigen::Matrix<double, 2, Eigen::Dynamic> &x2,
-            const Eigen::Matrix<double, 3, Eigen::Dynamic> &X) const {
+            Eigen::Matrix<double, 3, Eigen::Dynamic> &X) const {
             // TODO: Can (or should we) avoid this situation?
             pose.dist_params[0] = pose.dist_params[0] * pose.focal * pose.focal;
             DronePoseLib::refinement_undist_with_structure(x1, x2, X, pose, 0, 1);

@@ -20,8 +20,6 @@ static const int MAX_ITER = 10;
 */
 
 
-#include <iostream>
-
 inline void drot(const Matrix3d &R, Matrix3d *dr1, Matrix3d *dr2, Matrix3d *dr3) {
     // skew = [0 -v(2) v(1); v(2) 0 -v(0); -v(1) v(0) 0]
 
@@ -380,11 +378,12 @@ void DronePoseLib::refinement_undist(const Eigen::Matrix<double, 2, Eigen::Dynam
 void DronePoseLib::refinement_undist_with_structure(
     const Eigen::Matrix<double, 2, Eigen::Dynamic> &x1,
     const Eigen::Matrix<double, 2, Eigen::Dynamic> &x2,
-    const Eigen::Matrix<double, 3, Eigen::Dynamic> &X,
+    Eigen::Matrix<double, 3, Eigen::Dynamic> &X,
     DronePoseLib::Camera &p,
     int Np,
     int Nd) {
     int n_pts = x2.cols();
+
     // One for each view
     int n_res = 2 * 2 * n_pts;
     int n_params = 6 + 1 + Np + Nd + 3 * n_pts;
@@ -395,8 +394,8 @@ void DronePoseLib::refinement_undist_with_structure(
     // Order for jacobian is: rotation, translation, focal, dist_params, 3D-points
     Matrix<double, Dynamic, Dynamic> J(n_res, n_params);
     J.setZero();
-    Matrix<double, Dynamic, 1> res(n_res, 1);
-    Matrix<double, Dynamic, 1> dx(n_params, 1);
+    VectorXd res(n_res, 1);
+    VectorXd dx(n_params, 1);
     res.setZero();
 
     Matrix<double, 3, Dynamic> Z = X;
@@ -414,9 +413,9 @@ void DronePoseLib::refinement_undist_with_structure(
         f2k *= f2;
     }
 
-    double r_pow[3];
-    Matrix<double, Dynamic, Dynamic> H;
-    Matrix<double, Dynamic, 1> g;
+    //double r_pow[3];
+    MatrixXd H;
+    VectorXd g;
     int iter;
     for (iter = 0; iter < MAX_ITER; ++iter) {
         // Z = R*Z + t
@@ -426,34 +425,23 @@ void DronePoseLib::refinement_undist_with_structure(
         drot(p.R, &dr1, &dr2, &dr3);
 
         for (int i = 0; i < n_pts; ++i) {
-            double d = Z(2, i);                   // These two lines
-            double r2 = x2.col(i).squaredNorm();  // are probably incorrect for first pose
+            double d = Z(2, i);
+            double r12 = x1.col(i).squaredNorm();
+            double r22 = x2.col(i).squaredNorm();
 
-            double num = 1.0;
-            double denom = p.focal + p.dist_params[0] * r2;
+            double denom1 = p.focal + p.dist_params[0] * r12;
+            double denom2 = p.focal + p.dist_params[0] * r22;
 
-            /*
-            r_pow[0] = r2; // 2
-            r_pow[1] = r2 * r2; // 4
-            r_pow[2] = r2 * r_pow[1]; // 6
+            double factor1 = 1.0 / denom1;
+            double factor2 = 1.0 / denom2;
 
-            for (int k = 0; k < Np; k++) {
-                num += p.dist_params[k] * r_pow[k];
-            }
-            */
-            /*
-            for (int k = 0; k < Nd; k++) {
-                denom += p.dist_params[Np + k] * r_pow[k];
-            }*/
+            double dfactor_df1 = -factor1 / denom1;
+            double dfactor_df2 = -factor2 / denom2;
 
-            double factor = num / denom;
-
-            double dfactor_df = -factor / denom;
-
-            res(4 * i + 0) = factor * x1(0, i) - X(0, i) / d;  // TODO: Double-check
-            res(4 * i + 1) = factor * x1(1, i) - X(1, i) / d;  // TODO: Double-check
-            res(4 * i + 2) = factor * x2(0, i) - Z(0, i) / d;
-            res(4 * i + 3) = factor * x2(1, i) - Z(1, i) / d;
+            res(4 * i + 0) = factor1 * x1(0, i) - X(0, i) / X(2, i);
+            res(4 * i + 1) = factor1 * x1(1, i) - X(1, i) / X(2, i);
+            res(4 * i + 2) = factor2 * x2(0, i) - Z(0, i) / d;
+            res(4 * i + 3) = factor2 * x2(1, i) - Z(1, i) / d;
 
             // Rotation
 
@@ -472,77 +460,51 @@ void DronePoseLib::refinement_undist_with_structure(
             J(4 * i + 3, 2) = -dZ_dr3(1) / Z(2, i) + Z(1, i) * dZ_dr3(2) / (Z(2, i)*Z(2, i));
 
             // tx
-            J(4 * i + 2, 3) = - 1.0 / d; // tx
-            J(4 * i + 3, 4) = - 1.0 / d; // ty
+            J(4 * i + 2, 3) = - 1.0 / d;
+
+            // ty
+            J(4 * i + 3, 4) = - 1.0 / d;
 
             // tz
             J(4 * i + 2, 5) = Z(0, i) / (d*d);
             J(4 * i + 3, 5) = Z(1, i) / (d*d);
 
             // focal
-            Vector3d Xi = X.col(i);
-            double Xi02 = Xi(0) * Xi(0);
-            double Xi12 = Xi(1) * Xi(1);
-            double Xi22 = Xi(2) * Xi(2);
-            double f = p.focal;
-            double f2 = f * f;
-            double lam = p.dist_params[0];
-            double f3 = f2*f;
-            double vv2 = std::pow((Xi(2) + lam*(Xi02*f2 + Xi12*f2))/Xi(2), 2);
-            J(4 * i + 0, 6) = Xi(0)/(Xi(2) + (lam*(Xi02*f2 + Xi12*f2))/Xi(2)) - (Xi(0)*f*lam*(2*Xi02*f + 2*Xi12*f))/(Xi(2)*vv2);
-            J(4 * i + 1, 6) = Xi(1)/(Xi(2) + (lam*(Xi02*f2 + Xi12*f2))/Xi(2)) - (Xi(1)*f*lam*(2*Xi02*f + 2*Xi12*f))/(Xi(2)*vv2);
-            J(4 * i + 2, 6) = dfactor_df * x2(0, i);
-            J(4 * i + 3, 6) = dfactor_df * x2(1, i);
+            J(4 * i + 0, 6) = dfactor_df1 * x1(0, i);
+            J(4 * i + 1, 6) = dfactor_df1 * x1(1, i);
+            J(4 * i + 2, 6) = dfactor_df2 * x2(0, i);
+            J(4 * i + 3, 6) = dfactor_df2 * x2(1, i);
 
-            // dist_params[0..Np-1]
-            /*
-            for (int k = 0; k < Np; ++k) {
-                double dfactor_dmu = r_pow[k] / denom;
-                J(4 * i + 2, 7 + k) = dfactor_dmu * x2(0, i);
-                J(4 * i + 3, 7 + k) = dfactor_dmu * x2(1, i);
-            }
-            */
-
-            // dist_params[Np..end]
-            for (int k = 0; k < Nd; ++k) {
-                double dfactor_dlambda = -r_pow[k] * num / (denom*denom);
-                J(4 * i + 0, 7 + Np + k) = dfactor_dlambda * x1(0, i); // TODO: Double-check
-                J(4 * i + 1, 7 + Np + k) = dfactor_dlambda * x1(1, i); // TODO: Double-check
-                J(4 * i + 2, 7 + Np + k) = dfactor_dlambda * x2(0, i);
-                J(4 * i + 3, 7 + Np + k) = dfactor_dlambda * x2(1, i);
-            }
+            // dist_params[0]
+            double dfactor_dlambda1 = -r12 / (denom1 * denom1);
+            double dfactor_dlambda2 = -r22 / (denom2 * denom2);
+            J(4 * i + 0, 7) = dfactor_dlambda1 * x1(0, i);
+            J(4 * i + 1, 7) = dfactor_dlambda1 * x1(1, i);
+            J(4 * i + 2, 7) = dfactor_dlambda2 * x2(0, i);
+            J(4 * i + 3, 7) = dfactor_dlambda2 * x2(1, i);
 
             // 3D-points
             Matrix3d R = p.R;
             Vector3d t = p.t;
-
-            double Z0 = t(0) + R(0, 0)*Xi(0) + R(0, 1)*Xi(1) + R(0, 2)*Xi(2);
-            double Z1 = t(1) + R(1, 0)*Xi(0) + R(1, 1)*Xi(1) + R(1, 2)*Xi(2);
-            double Z2 = t(2) + R(2, 0)*Xi(0) + R(2, 1)*Xi(1) + R(2, 2)*Xi(2);
-            double Z02 = Z0 * Z0;
-            double Z12 = Z1 * Z1;
-            double Z22 = Z2 * Z2;
-            double uu  = Z2 + (lam * (f2 * Z02 + f2 * Z12)) / Z2;
-            double uu2 = uu * uu;
-
+            Vector3d Xi = X.col(i);
 
             // X(0)
-            J(4 * i + 0, 7 + Np + Nd + 3 * i + 0) = f/(Xi(2) + (lam*(Xi02*f2 + Xi12*f2))/Xi(2)) - (2*Xi02*f3*lam)/(Xi(2)*vv2);
-            J(4 * i + 1, 7 + Np + Nd + 3 * i + 0) = -(2*Xi(0)*Xi(1)*f3*lam)/(Xi(2)*vv2);
-            J(4 * i + 2, 7 + Np + Nd + 3 * i + 0) = (R(0, 0)*f)/(uu) - (f*(R(2, 0) + (lam*(2*R(0, 0)*f2*Z0 + 2*R(1, 0)*f2*Z1))/Z2 - (R(2, 0)*lam*(f2*Z02 + f2*Z12))/Z22)*Z0)/uu2;
-            J(4 * i + 3, 7 + Np + Nd + 3 * i + 0) = (R(1, 0)*f)/(uu) - (f*(R(2, 0) + (lam*(2*R(0, 0)*f2*Z0 + 2*R(1, 0)*f2*Z1))/Z2 - (R(2, 0)*lam*(f2*Z02 + f2*Z12))/Z22)*Z1)/uu2;
+            J(4 * i + 0, 7 + Np + Nd + 3 * i + 0) = -1 / Xi(2);
+            J(4 * i + 1, 7 + Np + Nd + 3 * i + 0) = 0;
+            J(4 * i + 2, 7 + Np + Nd + 3 * i + 0) = R(2, 0) * Z(0, i) / (Z(2, i)*Z(2, i)) - R(0, 0) / Z(2, i);
+            J(4 * i + 3, 7 + Np + Nd + 3 * i + 0) = R(2, 0) * Z(1, i) / (Z(2, i)*Z(2, i)) - R(1, 0) / Z(2, i);
 
             // X(1)
-            J(4 * i + 0, 7 + Np + Nd + 3 * i + 1) = -(2*Xi(0)*Xi(1)*f3*lam)/(Xi(2)*vv2);
-            J(4 * i + 1, 7 + Np + Nd + 3 * i + 1) = f/(Xi(2) + (lam*(Xi02*f2 + Xi12*f2))/Xi(2)) - (2*Xi12*f3*lam)/(Xi(2)*vv2);
-            J(4 * i + 2, 7 + Np + Nd + 3 * i + 1) = (R(0, 1)*f)/(uu) - (f*(R(2, 1) + (lam*(2*R(0, 1)*f2*Z0 + 2*R(1, 1)*f2*Z1))/Z2 - (R(2, 1)*lam*(f2*Z02 + f2*Z12))/Z22)*Z0)/uu2;
-            J(4 * i + 3, 7 + Np + Nd + 3 * i + 1) = (R(1, 1)*f)/(uu) - (f*(R(2, 1) + (lam*(2*R(0, 1)*f2*Z0 + 2*R(1, 1)*f2*Z1))/Z2 - (R(2, 1)*lam*(f2*Z02 + f2*Z12))/Z22)*Z1)/uu2;
+            J(4 * i + 0, 7 + Np + Nd + 3 * i + 1) = 0;
+            J(4 * i + 1, 7 + Np + Nd + 3 * i + 1) = -1 / Xi(2);
+            J(4 * i + 2, 7 + Np + Nd + 3 * i + 1) = R(2, 1) * Z(0, i) / (Z(2, i)*Z(2, i)) - R(0, 1) / Z(2, i);
+            J(4 * i + 3, 7 + Np + Nd + 3 * i + 1) = R(2, 1) * Z(1, i) / (Z(2, i)*Z(2, i)) - R(1, 1) / Z(2, i);
 
             // X(2)
-            J(4 * i + 0, 7 + Np + Nd + 3 * i + 2) = (Xi(0)*f*((lam*(Xi02*f2 + Xi12*f2))/Xi22 - 1))/vv2;
-            J(4 * i + 1, 7 + Np + Nd + 3 * i + 2) = (Xi(1)*f*((lam*(Xi02*f2 + Xi12*f2))/Xi22 - 1))/vv2;
-            J(4 * i + 2, 7 + Np + Nd + 3 * i + 2) = (R(0, 2)*f)/(uu) - (f*(R(2, 2) + (lam*(2*R(0, 2)*f2*Z0 + 2*R(1, 2)*f2*Z1))/Z2 - (R(2, 2)*lam*(f2*Z02 + f2*Z12))/Z22)*Z0)/uu2;
-            J(4 * i + 3, 7 + Np + Nd + 3 * i + 2) = (R(1, 2)*f)/(uu) - (f*(R(2, 2) + (lam*(2*R(0, 2)*f2*Z0 + 2*R(1, 2)*f2*Z1))/Z2 - (R(2, 2)*lam*(f2*Z02 + f2*Z12))/Z22)*Z1)/uu2;
+            J(4 * i + 0, 7 + Np + Nd + 3 * i + 2) = Xi(0) / (Xi(2) * Xi(2));
+            J(4 * i + 1, 7 + Np + Nd + 3 * i + 2) = Xi(1) / (Xi(2) * Xi(2));
+            J(4 * i + 2, 7 + Np + Nd + 3 * i + 2) = R(2, 2) * Z(0, i) / (Z(2, i)*Z(2, i)) - R(0, 2) / Z(2, i);
+            J(4 * i + 3, 7 + Np + Nd + 3 * i + 2) = R(2, 2) * Z(1, i) / (Z(2, i)*Z(2, i)) - R(1, 2) / Z(2, i);
         }
 
         if (res.norm() < TOL_CONVERGENCE)
@@ -556,24 +518,24 @@ void DronePoseLib::refinement_undist_with_structure(
         if (g.cwiseAbs().maxCoeff() < TOL_CONVERGENCE)
             break;
 
-        std::cout << "iter=" << iter << " res=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
-        std::cout << res << "\n";
-        std::cout << "J =\n" << J << "\n";
+        //std::cout << "iter=" << iter << " res.squaredNorm()=" << res.squaredNorm() << ", g="<< g.squaredNorm() << "\n";
+        //std::cout << "res =\n" << res << std::endl;
+        //std::cout << "J =\n" << J << "\n";
 
         dx = H.ldlt().solve(g);
-        std::cout << "dx =\n"<< dx << "\n";
+        //std::cout << "dx =\n"<< dx << "\n";
 
-        Vector3d dx_r = dx.block<3, 1>(0, 0);
+        Vector3d dx_r = dx.block<3, 1>(0, 0); // dx.head(3)
         update_rot(dx_r, p.R);
         p.t(0) += dx(3);
         p.t(1) += dx(4);
         p.t(2) += dx(5);
         p.focal += dx(6);
+        p.dist_params[0] += dx(7);
 
-        for (int i = 0; i < Np; ++i)
-            p.dist_params[i] += dx(7 + i);
-        for (int i = 0; i < Nd; ++i)
-            p.dist_params[i + Np] += dx(Np + 7 + i);
+        for (int k = 0; k < n_pts; k++) {
+            X.col(k) += dx.segment(7+1+3*k, 3);
+        }
 
         if (dx.array().abs().maxCoeff() < SMALL_NUMBER)
             break;
@@ -581,7 +543,7 @@ void DronePoseLib::refinement_undist_with_structure(
         lm_damp = std::max(1e-8, lm_damp / 10.0);
     }
 
-    std::cout << "Local opt finished. iter=" << iter << ", res=" << res.norm() << ", g=" << g.norm() << "\n";
+    // std::cout << "Local opt finished. iter=" << iter << ", res=" << res.norm() << ", g=" << g.norm() << "\n";
 
     // Revert change of variables
     f2 = p.focal * p.focal;
