@@ -163,13 +163,11 @@ public:
                 // TODO: Do nothing?
             }
         }
-
-        // TODO: Refine both p1 and p2 simultaneously?
-        solver.refine(*p, p2, X);
+        solver.refine(*p, p1, p2, X);
     }
 
-    bool use_non_minimal = false; // true;
-    bool use_local_opt = false;  // true;
+    bool use_non_minimal = true; // true;
+    bool use_local_opt = true;  // true;
 private:
     Solver solver;
     Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;

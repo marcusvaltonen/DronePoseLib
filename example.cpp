@@ -142,8 +142,8 @@ int main() {
     // RANSAC parmeters
     ransac_lib::LORansacOptions options;
     options.squared_inlier_threshold_ = 1;
-    options.success_probability_ = 0.99;
-    options.min_num_iterations_ = 40u;
+    options.success_probability_ = 0.9999;
+    options.min_num_iterations_ = 100u;
     options.max_num_iterations_ = 200u;
     std::random_device rand_dev;
     options.random_seed_ = rand_dev();
@@ -158,7 +158,7 @@ int main() {
     DronePoseLib::Camera best_model;
     start = std::chrono::steady_clock::now();
 
-    nbr_iter = 10;
+    nbr_iter = 1;
 
     int num_ransac_inliers;
     for (int i = 0; i < nbr_iter; i++) {

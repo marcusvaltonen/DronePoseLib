@@ -48,9 +48,14 @@ class Solver : public PoseEstimator<Solver> {
             inverse_1param_division_model(dist_params[0], xu, xd);
         }
 
-        inline void refine(Camera &pose, const Eigen::Matrix<double, 2, Eigen::Dynamic> &x, const Eigen::Matrix<double, 3, Eigen::Dynamic> &X) const {
+        inline void refine(
+            Camera &pose,
+            const Eigen::Matrix<double, 2, Eigen::Dynamic> &x1,
+            const Eigen::Matrix<double, 2, Eigen::Dynamic> &x2,
+            const Eigen::Matrix<double, 3, Eigen::Dynamic> &X) const {
+            // TODO: Can (or should we) avoid this situation?
             pose.dist_params[0] = pose.dist_params[0] * pose.focal * pose.focal;
-            DronePoseLib::refinement_undist_with_structure(x, X, pose, 0, 1);
+            DronePoseLib::refinement_undist_with_structure(x1, x2, X, pose, 0, 1);
             pose.dist_params[0] = pose.dist_params[0] / pose.focal / pose.focal;
         }
     };
