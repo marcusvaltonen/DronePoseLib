@@ -137,7 +137,9 @@ int main() {
     R1.setIdentity();
     R2 = pose_gt.R;
 
-    DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator);
+    // Refinement settings
+    DronePoseLib::RefinementSettings settings;
+    DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator, settings);
 
     // RANSAC parmeters
     ransac_lib::LORansacOptions options;

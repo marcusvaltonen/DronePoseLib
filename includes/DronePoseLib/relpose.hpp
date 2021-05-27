@@ -40,6 +40,15 @@ struct Camera {
     double focal;
     std::vector<double> dist_params;
 };
+struct RefinementSettings {
+    RefinementSettings() : SMALL_NUMBER(1e-8), TOL_CONVERGENCE(1e-10), INITIAL_LM_DAMP(1e-6), MAX_ITER(10), DECREASE_FACTOR(10.0) {}
+    double SMALL_NUMBER;
+    double TOL_CONVERGENCE;
+    double INITIAL_LM_DAMP;
+    int MAX_ITER;
+    double DECREASE_FACTOR;
+};
+
 }  // namespace DronePoseLib
 
 #endif  // INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
