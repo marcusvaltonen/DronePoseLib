@@ -1,28 +1,41 @@
-// TODO: Merge with existing distortion stuff
-#pragma once
+// Copyright (c) 2021 Marcus Valtonen Örnhag
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+// Original implementation by Viktor Larsson.
+
+#ifndef SRC_HELPERS_DISTORTION_HPP_
+#define SRC_HELPERS_DISTORTION_HPP_
+
 #include <Eigen/Dense>
 #include <vector>
 
 namespace DronePoseLib {
-
-	/* Computes x1 such that x1 = x0/(1+lambda*sum(x0.^2)) */
-	void forward_1param_division_model(double lambda, const Eigen::Matrix<double, 2, Eigen::Dynamic> &x0, Eigen::Matrix<double, 2, Eigen::Dynamic>* x1);
-	/* Computes x1 such that x1/(1+lambda*sum(x1.^2)) = x0 */
-	void inverse_1param_division_model(double lambda, const Eigen::Matrix<double, 2, Eigen::Dynamic> &x0, Eigen::Matrix<double, 2, Eigen::Dynamic>* x1);
-
-
-	/*
-	 Rational distortion functions
-	  f(r) = (1+ mu_1 * r2 + ... + mu_np * r^(2*np)) / (1+ lambda_1 * r2 + ... + lambda_nd * r^(2*nd))
-	 distortion parmeters are dist_params = [mu; lambda]
-	*/
-
-
-	/* Computes x1 such that x1 = f(|x0|) * x0  */
-	void forward_rational_model(const std::vector<double> &params, int np, int nd, const Eigen::Matrix<double, 2, Eigen::Dynamic> &x0, Eigen::Matrix<double, 2, Eigen::Dynamic>* x1);
-	/* Computes x1 such that x0 = f(|x1|) * x1.
-       Since there is no analytical solution, this is done by iterative method */
-	void inverse_rational_model(const std::vector<double> &params, int np, int nd, const Eigen::Matrix<double, 2, Eigen::Dynamic> &x0, Eigen::Matrix<double, 2, Eigen::Dynamic>* x1);
-
-
-};
+/* Computes x1 such that x1 = x0/(1+lambda*sum(x0.^2)) */
+void forward_1param_division_model(
+    double lambda,
+    const Eigen::Matrix<double, 2, Eigen::Dynamic> &x0,
+    Eigen::Matrix<double, 2, Eigen::Dynamic> *x1);
+/* Computes x1 such that x1/(1+lambda*sum(x1.^2)) = x0 */
+void inverse_1param_division_model(
+    double lambda,
+    const Eigen::Matrix<double, 2, Eigen::Dynamic> &x0,
+    Eigen::Matrix<double, 2, Eigen::Dynamic> *x1);
+};  // namespace DronePoseLib
+#endif  // SRC_HELPERS_DISTORTION_HPP_

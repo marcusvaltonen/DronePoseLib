@@ -26,18 +26,20 @@
 #include "relpose.hpp"
 
 
-// TODO: Change name to reflect frEfr
+// TODO(marcusvaltonen): Change name to reflect frEfr
 int DronePoseLib::ValtonenOrnhagArxiv2021::Solver::solve(
-    DronePoseLib::Points2D &x1,
-    DronePoseLib::Points2D &x2,
+    const DronePoseLib::Points2D &x1,
+    const DronePoseLib::Points2D &x2,
     const Eigen::Matrix3d &R1,
     const Eigen::Matrix3d &R2,
     std::vector<DronePoseLib::Camera>* poses) const {
 
-    // TODO: Consider replacing RelPose with Camera, and just call a computerFundamentalMatrix function.
-    std::vector<DronePoseLib::RelPose> relpose = DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, true);
+    // TODO(marcusvaltonen): Consider replacing RelPose with Camera,
+    // and just call a computerFundamentalMatrix function.
+    std::vector<DronePoseLib::RelPose> relpose =
+        DronePoseLib::ValtonenOrnhagArxiv2021::get_frEfr(x1, x2, R1, R2, true);
 
-    // TODO: Consider saving the relative pose early on and send it in instead
+    // TODO(marcusvaltonen): Consider saving the relative pose early on and send it in instead
     Eigen::Matrix3d R = R2 * R1.transpose();
     for (int i=0; i < relpose.size(); i++) {
         DronePoseLib::Camera p;

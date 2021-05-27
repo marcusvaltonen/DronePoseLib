@@ -18,13 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <RansacLib/ransac.h>
 #include <Eigen/Dense>
 #include <chrono>  // NOLINT [build/c++11]
 #include <iostream>
+#include <limits>
 #include "get_valtonenornhag_arxiv_2021.hpp"
 #include "relpose.hpp"
-#include <limits>
-#include <RansacLib/ransac.h>
 #include "ransac_estimator.hpp"
 #include "ransac_valtonenornhag_arxiv_2021.hpp"
 #include "scene_and_pose_generation.hpp"
@@ -114,17 +114,17 @@ int main() {
 
     DronePoseLib::ValtonenOrnhagArxiv2021::Solver estimator;
 
-    generate_scene_and_image(100, 2, 10, 70, false, &pose_gt, &xx1, &xx2, 1.0);
+    generate_scene_and_image(100, 2, 10, 70, &pose_gt, &xx1, &xx2, 1.0);
     add_focal(2000.0, &pose_gt, &xx1);
     add_focal(2000.0, &pose_gt, &xx2);
-    add_distortion_1pdiv(dist_param, &pose_gt, &xx1);
-    add_distortion_1pdiv(dist_param, &pose_gt, &xx2);
+    add_distortion(dist_param, &pose_gt, &xx1);
+    add_distortion(dist_param, &pose_gt, &xx2);
     add_noise(0.5, &xx1);
     add_noise(0.5, &xx2);
 
     // Outliers
     for (int i = 0; i < 20; ++i) {
-        Vector2d n;
+        Eigen::Vector2d n;
         n.setRandom();
         n *= 0.2 * pose_gt.focal;
         xx1.col(i) += n;
@@ -138,8 +138,7 @@ int main() {
     R2 = pose_gt.R;
 
     // Refinement settings
-    DronePoseLib::RefinementSettings settings;
-    DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator, settings);
+    DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator);
 
     // RANSAC parmeters
     ransac_lib::LORansacOptions options;

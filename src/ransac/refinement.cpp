@@ -21,8 +21,9 @@
 // Modified from Viktor Larsson's radialpose implementation
 // https://github.com/vlarsson/radialpose
 
-#include "refinement.hpp"
 #include <Eigen/Dense>
+#include <algorithm>
+#include "refinement.hpp"
 
 
 inline void drot(const Eigen::Matrix3d &R, Eigen::Matrix3d *dr1, Eigen::Matrix3d *dr2, Eigen::Matrix3d *dr3) {
@@ -44,26 +45,32 @@ inline void drot(const Eigen::Matrix3d &R, Eigen::Matrix3d *dr1, Eigen::Matrix3d
     dr3->row(2).setZero();
 }
 
-inline void update_rot(Eigen::Vector3d &v, Eigen::Matrix3d &rot, const DronePoseLib::RefinementSettings &settings) {
+inline void update_rot(
+    Eigen::Vector3d &v,
+    Eigen::Matrix3d &rot,
+    const DronePoseLib::RefinementSettings &settings
+) {
     double stheta = v.norm();
     if (stheta < settings.SMALL_NUMBER)
         return;
     v /= stheta;
     double theta = asin(stheta);
     Eigen::Matrix3d K;
+    // K << 0, -(*v)(2), (*v)(1), (*v)(2), 0, -(*v)(0), -(*v)(1), (*v)(0), 0;
     K << 0, -v(2), v(1), v(2), 0, -v(0), -v(1), v(0), 0;
     Eigen::Matrix3d deltaR = Eigen::Matrix3d::Identity() + stheta * K + (1 - cos(theta))*K*K;
     rot = deltaR * rot;
 }
 
 
-// TODO: Consider returning a flag on success, break etc.
+// TODO(marcusvaltonen): Consider returning a flag on success, break etc.
 void DronePoseLib::refinement_undist_with_structure(
     const Eigen::Matrix<double, 2, Eigen::Dynamic> &x1,
     const Eigen::Matrix<double, 2, Eigen::Dynamic> &x2,
-    Eigen::Matrix<double, 3, Eigen::Dynamic> &X,
     DronePoseLib::Camera &p,
-    const DronePoseLib::RefinementSettings &settings) {
+    Eigen::Matrix<double, 3, Eigen::Dynamic> &X,
+    const DronePoseLib::RefinementSettings &settings
+) {
     int n_pts = x2.cols();
 
     // One for each view
@@ -193,7 +200,7 @@ void DronePoseLib::refinement_undist_with_structure(
 
         dx = H.ldlt().solve(g);
 
-        // TODO: add check that cost decreases in LM
+        // TODO(marcusvaltonen): add check that cost decreases in LM
         Eigen::Vector3d dx_r = dx.head(3);
         update_rot(dx_r, p.R, settings);
         p.t(0) += dx(3);

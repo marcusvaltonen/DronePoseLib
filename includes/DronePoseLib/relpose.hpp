@@ -21,8 +21,8 @@
 #ifndef INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
 #define INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
 
-#include <vector>
 #include <Eigen/Dense>
+#include <vector>
 
 namespace DronePoseLib {
 struct RelPose {
@@ -33,15 +33,20 @@ struct RelPose {
 };
 struct Camera {
     Camera() : focal(1.0) {}
-    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans, double f) : R(rot), t(trans), focal(f) {};
-    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans) : R(rot), t(trans), focal(1.0) {};
+    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans, double f) : R(rot), t(trans), focal(f) {}
+    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans) : R(rot), t(trans), focal(1.0) {}
     Eigen::Matrix3d R;
     Eigen::Vector3d t;
     double focal;
     std::vector<double> dist_params;
 };
 struct RefinementSettings {
-    RefinementSettings() : SMALL_NUMBER(1e-8), TOL_CONVERGENCE(1e-10), INITIAL_LM_DAMP(1e-6), MAX_ITER(10), DECREASE_FACTOR(10.0) {}
+    RefinementSettings() :
+        SMALL_NUMBER(1e-8),
+        TOL_CONVERGENCE(1e-10),
+        INITIAL_LM_DAMP(1e-6),
+        MAX_ITER(10),
+        DECREASE_FACTOR(10.0) {}
     double SMALL_NUMBER;
     double TOL_CONVERGENCE;
     double INITIAL_LM_DAMP;

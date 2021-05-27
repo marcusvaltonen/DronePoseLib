@@ -116,7 +116,7 @@ script:
     --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp \
     --exclude=tests/catch2 \
     --exclude=thirdparty \
-    --filter=-build/include_subdir \
+    --filter=-build/include_subdir,-runtime/references \
     --recursive \
     --quiet .
 

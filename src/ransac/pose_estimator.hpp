@@ -27,31 +27,29 @@
 #include "relpose.hpp"
 
 namespace DronePoseLib {
+// TODO(marcusvaltonen): Consider moving Points2D
+static const int MAX_SAMPLE_SIZE = 8;
+typedef Eigen::Matrix<double, 2, Eigen::Dynamic, 0, 2, MAX_SAMPLE_SIZE> Points2D;
 
-    // TODO: Consider moving Points2D
-    static const int MAX_SAMPLE_SIZE = 8;
-    typedef Eigen::Matrix<double, 2, Eigen::Dynamic, 0, 2, MAX_SAMPLE_SIZE> Points2D;
+// We use CRTP here for the solvers.
+template<class Solver>
+class PoseEstimator {
+ public:
+  int estimate(
+    const DronePoseLib::Points2D &image_points1,
+    const DronePoseLib::Points2D &image_points2,
+    const Eigen::Matrix3d &rotation_matrix1,
+    const Eigen::Matrix3d &rotation_matrix2,
+    std::vector<DronePoseLib::Camera> *poses) const;
 
-    // We use CRTP here for the solvers.
-    template<class Solver>
-    class PoseEstimator {
-    public:
-        int estimate(
-            const DronePoseLib::Points2D &image_points1,
-            const DronePoseLib::Points2D &image_points2,
-            const Eigen::Matrix3d &rotation_matrix1,
-            const Eigen::Matrix3d &rotation_matrix2,
-            std::vector<DronePoseLib::Camera> *poses) const;
+  inline int minimal_sample_size() const {
+      return static_cast<const Solver*>(this)->minimal_sample_size();
+  }
 
-        inline int minimal_sample_size() const {
-            return static_cast<const Solver*>(this)->minimal_sample_size();
-        }
-
-    protected:
-        PoseEstimator() = default;
-    };
+ protected:
+  PoseEstimator() = default;
 };
-
+};  // namespace DronePoseLib
 
 template<class Solver>
 int DronePoseLib::PoseEstimator<Solver>::estimate(
@@ -59,8 +57,7 @@ int DronePoseLib::PoseEstimator<Solver>::estimate(
     const DronePoseLib::Points2D &image_points2,
     const Eigen::Matrix3d &rotation_matrix1,
     const Eigen::Matrix3d &rotation_matrix2,
-    std::vector<DronePoseLib::Camera> *poses) const
-{
+    std::vector<DronePoseLib::Camera> *poses) const {
     DronePoseLib::Points2D x1 = image_points1;
     DronePoseLib::Points2D x2 = image_points2;
     Eigen::Matrix3d R1 = rotation_matrix1;

@@ -22,39 +22,33 @@
 #define SRC_RANSAC_RANSAC_ESTIMATOR_HPP_
 
 #include <Eigen/Dense>
+#include <limits>
+#include <vector>
 #include "distortion.hpp"
 #include "relpose.hpp"
 #include "pose_estimator.hpp"
 #include "triangulate.hpp"
 
-// TODO: No const& declaration as input to class? Check guidelines
-// NOTE: Points2D is optimal for up to 8 (non-minimal).
-
-
-//DEBUG
-#include <iostream>
-#include "scene_and_pose_generation.hpp"
-
 namespace DronePoseLib {
 template<class Solver>
 class RansacEstimator {
-public:
-    RansacEstimator(
-        Eigen::Matrix<double, 2, Eigen::Dynamic> p1,
-        Eigen::Matrix<double, 2, Eigen::Dynamic> p2,
-        Eigen::Matrix3d R1,
-        Eigen::Matrix3d R2,
-        Solver est) {
-        image_points1 = p1;
-        image_points2 = p2;
-        rotation_matrix1 = R1;
-        rotation_matrix2 = R2;
-        solver = est;
+ public:
+  RansacEstimator(
+      Eigen::Matrix<double, 2, Eigen::Dynamic> p1,
+      Eigen::Matrix<double, 2, Eigen::Dynamic> p2,
+      Eigen::Matrix3d R1,
+      Eigen::Matrix3d R2,
+      Solver est) {
+          image_points1 = p1;
+          image_points2 = p2;
+          rotation_matrix1 = R1;
+          rotation_matrix2 = R2;
+          solver = est;
 
-        // Use default settings
-        DronePoseLib::RefinementSettings s;
-        settings = s;
-    }
+          // Use default settings
+          DronePoseLib::RefinementSettings s;
+          settings = s;
+      }
     RansacEstimator(
         Eigen::Matrix<double, 2, Eigen::Dynamic> p1,
         Eigen::Matrix<double, 2, Eigen::Dynamic> p2,
@@ -142,7 +136,7 @@ public:
         }
 
         // Measure distance in distorted space
-        // TODO: Make distortion accept Vector2d as well
+        // TODO(marcusvaltonen): Make distortion accept Vector2d as well
         Eigen::Matrix<double, 2, Eigen::Dynamic> x1_p = pose.focal * X.hnormalized();
         DronePoseLib::inverse_1param_division_model(pose.dist_params[0], x1_p, &x1_p);
 
@@ -172,15 +166,16 @@ public:
             X.col(i) = Xi;
 
             if (!succ) {
-                // TODO: Do nothing?
+                // TODO(marcusvaltonen): Do nothing?
             }
         }
-        solver.refine(*p, p1, p2, X, settings);
+        solver.refine(p1, p2, *p, X, settings);
     }
 
     bool use_non_minimal = true;
     bool use_local_opt = true;
-private:
+
+ private:
     Solver solver;
     DronePoseLib::RefinementSettings settings;
     Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;
@@ -188,5 +183,5 @@ private:
     Eigen::Matrix3d rotation_matrix1;
     Eigen::Matrix3d rotation_matrix2;
 };
-}
+}  // namespace DronePoseLib
 #endif  // SRC_RANSAC_RANSAC_ESTIMATOR_HPP_

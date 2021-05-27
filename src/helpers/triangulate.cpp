@@ -25,7 +25,6 @@
 
 namespace DronePoseLib {
 bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vector2d& p2, Eigen::Vector3d *t) {
-
     // Normalize points
     Eigen::Matrix<double, 2, Eigen::Dynamic> x1, x2;
     DronePoseLib::forward_1param_division_model(pose.dist_params[0], p1, &x1);
@@ -34,7 +33,6 @@ bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vec
     x2 /= pose.focal;
 
     // First pose is assumed to be the identity
-    // TODO: Fixed 6x6?
     Eigen::MatrixXd M(6, 6);
     M.setZero();
     M.topLeftCorner(3, 3).setIdentity();
@@ -51,8 +49,8 @@ bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vec
     (*t) = Q.block(0, 5, 3, 1) / Q(3, 5);
 
     // Check if point is in front of the camera
-    bool succ = Q(4,5) / Q(3,5) > 0 && Q(5,5) / Q(3,5) > 0;
+    bool succ = Q(4, 5) / Q(3, 5) > 0 && Q(5, 5) / Q(3, 5) > 0;
 
     return succ;
 }
-}
+}  // namespace DronePoseLib
