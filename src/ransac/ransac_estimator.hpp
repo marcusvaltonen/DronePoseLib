@@ -44,15 +44,25 @@ public:
         Eigen::Matrix<double, 2, Eigen::Dynamic> p2,
         Eigen::Matrix3d R1,
         Eigen::Matrix3d R2,
-        Solver est,
-        DronePoseLib::RefinementSettings s) {
-        // TODO: Make sure p1 and p2 are of the same length (and larger than minimal sample size)
+        Solver est) {
         image_points1 = p1;
         image_points2 = p2;
         rotation_matrix1 = R1;
         rotation_matrix2 = R2;
         solver = est;
+
+        // Use default settings
+        DronePoseLib::RefinementSettings s;
         settings = s;
+    }
+    RansacEstimator(
+        Eigen::Matrix<double, 2, Eigen::Dynamic> p1,
+        Eigen::Matrix<double, 2, Eigen::Dynamic> p2,
+        Eigen::Matrix3d R1,
+        Eigen::Matrix3d R2,
+        Solver est,
+        DronePoseLib::RefinementSettings s) : RansacEstimator(p1, p2, R1, R2) {
+        this->settings = s;
     }
 
     inline int min_sample_size() const {
