@@ -21,6 +21,7 @@
 #include <Eigen/Dense>
 #include <catch2/catch.hpp>
 #include "get_valtonenornhag_arxiv_2021.hpp"
+#include "distortion.hpp"
 #include "relpose.hpp"
 #include "triangulate.hpp"
 
@@ -57,4 +58,28 @@ TEST_CASE("triangulate") {
 
     REQUIRE(succ);
     REQUIRE(X.isApprox(expected, tol));
+}
+
+TEST_CASE("distortion") {
+    int N = 5;
+    double lambda = -0.01;
+    Eigen::Matrix<double, 2, Eigen::Dynamic> x(2, N);
+    x.row(0).setLinSpaced(N, -1.0, 1.0);
+    x.row(1).setLinSpaced(N, 1.0, 5.0);
+
+    double tol = 1e-12;
+    Eigen::Matrix<double, 2, Eigen::Dynamic> y(2, N);
+    Eigen::Matrix<double, 2, Eigen::Dynamic> expected(2, N);
+
+    // Distort
+    expected << -0.980762113533166, -0.480384603759981,                  0,  0.437728089025404,  0.823626318670327,
+                 0.980762113533166,   1.92153841503992,   2.76983964948433,   3.50182471220324,   4.11813159335163;
+    DronePoseLib::inverse_1param_division_model(lambda, x, &y);
+    REQUIRE(y.isApprox(expected, tol));
+
+    // Undistort
+    expected << -1.02040816326531, -0.522193211488251,                  0,  0.597014925373134,   1.35135135135135,
+                 1.02040816326531,     2.088772845953,    3.2967032967033,   4.77611940298507,   6.75675675675676;
+    DronePoseLib::forward_1param_division_model(lambda, x, &y);
+    REQUIRE(y.isApprox(expected, tol));
 }
