@@ -51,10 +51,11 @@ class Solver : public PoseEstimator<Solver> {
             Camera &pose,
             const Eigen::Matrix<double, 2, Eigen::Dynamic> &x1,
             const Eigen::Matrix<double, 2, Eigen::Dynamic> &x2,
-            Eigen::Matrix<double, 3, Eigen::Dynamic> &X) const {
+            Eigen::Matrix<double, 3, Eigen::Dynamic> &X,
+            const DronePoseLib::RefinementSettings &settings) const {
             // TODO: Can (or should we) avoid this situation?
             pose.dist_params[0] = pose.dist_params[0] * pose.focal * pose.focal;
-            DronePoseLib::refinement_undist_with_structure(x1, x2, X, pose, 0, 1);
+            DronePoseLib::refinement_undist_with_structure(x1, x2, X, pose, settings);
             pose.dist_params[0] = pose.dist_params[0] / pose.focal / pose.focal;
         }
     };

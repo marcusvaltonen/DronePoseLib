@@ -44,13 +44,15 @@ public:
         Eigen::Matrix<double, 2, Eigen::Dynamic> p2,
         Eigen::Matrix3d R1,
         Eigen::Matrix3d R2,
-        Solver est) {
+        Solver est,
+        DronePoseLib::RefinementSettings s) {
         // TODO: Make sure p1 and p2 are of the same length (and larger than minimal sample size)
         image_points1 = p1;
         image_points2 = p2;
         rotation_matrix1 = R1;
         rotation_matrix2 = R2;
         solver = est;
+        settings = s;
     }
 
     inline int min_sample_size() const {
@@ -163,13 +165,14 @@ public:
                 // TODO: Do nothing?
             }
         }
-        solver.refine(*p, p1, p2, X);
+        solver.refine(*p, p1, p2, X, settings);
     }
 
     bool use_non_minimal = true;
     bool use_local_opt = true;
 private:
     Solver solver;
+    DronePoseLib::RefinementSettings settings;
     Eigen::Matrix<double, 2, Eigen::Dynamic> image_points1;
     Eigen::Matrix<double, 2, Eigen::Dynamic> image_points2;
     Eigen::Matrix3d rotation_matrix1;
