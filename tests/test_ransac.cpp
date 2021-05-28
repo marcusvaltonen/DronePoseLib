@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <stdlib.h>  // srand
 #include <RansacLib/ransac.h>
 #include <Eigen/Dense>
 #include <catch2/catch.hpp>
-#include <stdlib.h>  // srand
 #include "get_valtonenornhag_arxiv_2021.hpp"
 #include "relpose.hpp"
 #include "ransac_estimator.hpp"
@@ -29,7 +29,6 @@
 #include "scene_and_pose_generation.hpp"
 
 TEST_CASE("RANSAC frEfr - intergration test") {
-
     Eigen::Matrix3d R1;
     Eigen::Matrix3d R2;
     // Test RANSAC
