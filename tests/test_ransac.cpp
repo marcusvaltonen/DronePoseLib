@@ -118,4 +118,5 @@ TEST_CASE("RANSAC frEfr - intergration test") {
     REQUIRE(best_model.dist_params[0] == Approx(-1.000030345486926e-07).margin(tol));
     // TMP MOVE
     REQUIRE(ransac_stats.best_model_score == Approx(20.2130419964).margin(tol));
+    REQUIRE(false);
 }

@@ -20,6 +20,7 @@
 //
 // Based on an implementation by Viktor Larsson, see radialpose.
 
+#include <stdlib.h>   // rand
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <Eigen/Dense>
@@ -32,13 +33,10 @@
 
 void set_random_pose(DronePoseLib::Camera *pose, double translation_scaling) {
     // Randomize angles, not to large, so that the camera is in front of the camera.
-    std::default_random_engine gen;
-    std::normal_distribution<double> d(0.0, 10.0 * M_PI / 180.0);
-
     Eigen::Matrix3d R;
-    R = Eigen::AngleAxisd(d(gen), Eigen::Vector3d::UnitX())
-      * Eigen::AngleAxisd(d(gen), Eigen::Vector3d::UnitY())
-      * Eigen::AngleAxisd(d(gen), Eigen::Vector3d::UnitZ());
+    R = Eigen::AngleAxisd((20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0, Eigen::Vector3d::UnitX())
+      * Eigen::AngleAxisd((20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0, Eigen::Vector3d::UnitY())
+      * Eigen::AngleAxisd((20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0, Eigen::Vector3d::UnitZ());
     Eigen::Vector3d t;
     t.setRandom();
     t *= translation_scaling;
@@ -120,12 +118,18 @@ void add_distortion(
 void add_noise(double sigma, Eigen::Matrix<double, 2, Eigen::Dynamic> *image_points) {
     Eigen::Matrix<double, 2, Eigen::Dynamic> noise;
     noise.resizeLike(*image_points);
+    // TODO(marcusvaltonen): Normal distribution, but without using distribution, since
+    // it is compiler dependent (makes integration tests harder to implement).
+    /*
     std::default_random_engine gen;
     std::normal_distribution<double> d(0.0, sigma);
     for (int i = 0; i < noise.cols(); i++) {
         noise(0, i) = d(gen);
         noise(1, i) = d(gen);
     }
+    */
+    noise.setRandom();
+    noise *= sigma;
     *image_points += noise;
 }
 
