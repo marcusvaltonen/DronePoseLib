@@ -25,6 +25,7 @@
 #include <Eigen/Dense>
 #include <random>
 #include <iostream>
+#include <iomanip>
 #include "scene_and_pose_generation.hpp"
 #include "relpose.hpp"
 #include "distortion.hpp"
@@ -129,16 +130,17 @@ void add_noise(double sigma, Eigen::Matrix<double, 2, Eigen::Dynamic> *image_poi
 }
 
 void debug_print_pose(DronePoseLib::Camera pose, bool relative) {
-    std::cout << "R: " << pose.R << std::endl;
+    Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
+    std::cout << "R: " << pose.R.format(HeavyFmt) << std::endl;
     Eigen::Vector3d t = pose.t;
 
     if (relative) {
         t /= t.norm();
     }
 
-    std::cout << "t:" << t << std::endl;
-    std::cout << "f:" << pose.focal << std::endl;
+    std::cout << "t:" << t.format(HeavyFmt) << std::endl;
+    std::cout << "f:" << std::setprecision(16) << pose.focal << std::endl;
     for (int j = 0; j < pose.dist_params.size(); j++) {
-        std::cout << "d[" << j << "]:" << pose.dist_params[j] << std::endl;
+        std::cout << "d[" << j << "]:" << std::setprecision(16) << pose.dist_params[j] << std::endl;
     }
 }

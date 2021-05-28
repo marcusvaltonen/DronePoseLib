@@ -153,12 +153,13 @@ class RansacEstimator {
         DronePoseLib::Camera* p) const {
         if (!use_local_opt)
             return;
-        Eigen::Matrix<double, 2, Eigen::Dynamic> p1(2, sample.size());
-        Eigen::Matrix<double, 2, Eigen::Dynamic> p2(2, sample.size());
-        Eigen::Matrix<double, 3, Eigen::Dynamic> X(3, sample.size());
+        int N = sample.size();
+        Eigen::Matrix<double, 2, Eigen::Dynamic> p1(2, N);
+        Eigen::Matrix<double, 2, Eigen::Dynamic> p2(2, N);
+        Eigen::Matrix<double, 3, Eigen::Dynamic> X(3, N);
         Eigen::Vector3d Xi;
 
-        for (int i = 0; i < sample.size(); i++) {
+        for (int i = 0; i < N; i++) {
             p1.col(i) = image_points1.col(sample[i]);
             p2.col(i) = image_points2.col(sample[i]);
 
