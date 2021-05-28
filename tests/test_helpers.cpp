@@ -22,6 +22,7 @@
 #include <catch2/catch.hpp>
 #include "get_valtonenornhag_arxiv_2021.hpp"
 #include "distortion.hpp"
+#include "scene_and_pose_generation.hpp"
 #include "relpose.hpp"
 #include "triangulate.hpp"
 
@@ -82,4 +83,31 @@ TEST_CASE("distortion") {
                  1.02040816326531,     2.088772845953,    3.2967032967033,   4.77611940298507,   6.75675675675676;
     DronePoseLib::forward_1param_division_model(lambda, x, &y);
     REQUIRE(y.isApprox(expected, tol));
+}
+
+TEST_CASE("add_parameters") {
+    DronePoseLib::Camera pose;
+    double focal = 2.0;
+    double dist_param = -0.01;
+
+    Eigen::Matrix<double, 2, Eigen::Dynamic> x(2, 3);
+    x << 1, 2, 3,
+         4, 5, 6;
+
+    add_focal(focal, &pose, &x);
+
+    REQUIRE(focal == pose.focal);
+
+    Eigen::Matrix<double, 2, Eigen::Dynamic> expected(2, 3);
+    expected << 2, 4, 6,
+                8, 10, 12;
+    double tol = 1e-12;
+    REQUIRE(x.isApprox(expected, tol));
+
+    add_distortion(dist_param, &pose, &x);
+    REQUIRE(dist_param == pose.dist_params[0]);
+
+    expected << 1.36577963558616, 2.37046278863376, 3.10594035442545,
+                5.46311854234465, 5.92615697158441,  6.2118807088509;
+    REQUIRE(x.isApprox(expected, tol));
 }
