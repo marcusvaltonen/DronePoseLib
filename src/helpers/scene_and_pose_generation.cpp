@@ -34,9 +34,15 @@
 void set_random_pose(DronePoseLib::Camera *pose, double translation_scaling) {
     // Randomize angles, not to large, so that the camera is in front of the camera.
     Eigen::Matrix3d R;
-    R = Eigen::AngleAxisd((20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0, Eigen::Vector3d::UnitX())
-      * Eigen::AngleAxisd((20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0, Eigen::Vector3d::UnitY())
-      * Eigen::AngleAxisd((20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0, Eigen::Vector3d::UnitZ());
+    double xv = (20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0;
+    double yv = (20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0;
+    double zv = (20.0 * rand() / RAND_MAX - 10.0) * M_PI / 180.0;
+
+    std::cout << "x = " << xv << " y = " << yv << " z = " << zv << std::endl;
+
+    R = Eigen::AngleAxisd(xv, Eigen::Vector3d::UnitX())
+      * Eigen::AngleAxisd(yv, Eigen::Vector3d::UnitY())
+      * Eigen::AngleAxisd(zv, Eigen::Vector3d::UnitZ());
     Eigen::Vector3d t;
     t.setRandom();
     t *= translation_scaling;
