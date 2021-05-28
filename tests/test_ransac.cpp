@@ -90,7 +90,6 @@ TEST_CASE("RANSAC frEfr - intergration test") {
     REQUIRE(num_ransac_inliers == 80);
     REQUIRE(ransac_stats.num_iterations == 100);
     REQUIRE(ransac_stats.best_num_inliers == 80);
-    REQUIRE(ransac_stats.best_model_score == Approx(20.2130419964).margin(tol));
     REQUIRE(ransac_stats.inlier_ratio == 0.8);
     for (int i=0; i <ransac_stats.inlier_indices.size(); i++)
         REQUIRE(ransac_stats.inlier_indices[i] == 20 + i);
@@ -106,8 +105,12 @@ TEST_CASE("RANSAC frEfr - intergration test") {
                    0.00937910544565988,
                    0.00948588308687222;
 
+    debug_print_pose(best_model);
+
     REQUIRE(best_model.R.isApprox(R_expected, tol));
     REQUIRE(best_model.t.isApprox(t_expected, tol));
     REQUIRE(best_model.focal == Approx(2000.561243083627).margin(tol));
     REQUIRE(best_model.dist_params[0] == Approx(-1.000030345486926e-07).margin(tol));
+    // TMP MOVE
+    REQUIRE(ransac_stats.best_model_score == Approx(20.2130419964).margin(tol));
 }
