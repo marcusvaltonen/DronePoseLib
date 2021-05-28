@@ -27,6 +27,7 @@
 #include "ransac_estimator.hpp"
 #include "ransac_valtonenornhag_arxiv_2021.hpp"
 #include "scene_and_pose_generation.hpp"
+#include <iostream>
 
 TEST_CASE("RANSAC frEfr - intergration test") {
     Eigen::Matrix3d R1;
@@ -50,6 +51,10 @@ TEST_CASE("RANSAC frEfr - intergration test") {
     add_distortion(dist_param, &pose_gt, &xx2);
     add_noise(0.5, &xx1);
     add_noise(0.5, &xx2);
+
+    debug_print_pose(pose_gt);
+    std::cout << "xx1 =\n" << xx1 << std::endl;
+    std::cout << "xx2 =\n" << xx2 << std::endl;
 
     // Outliers
     for (int i = 0; i < 20; ++i) {
