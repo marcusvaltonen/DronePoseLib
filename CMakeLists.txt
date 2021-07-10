@@ -45,12 +45,20 @@ add_executable(example ${SRCS} ${EXAMPLE_SRCS})
 target_link_libraries(example PRIVATE Eigen3::Eigen)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(UNIX)
     set(TEST_SRCS
         tests/test_helpers.cpp
         tests/test_main.cpp
         tests/test_ransac.cpp
         tests/test_valtonenornhag_arxiv_2021.cpp
     )
+    else()
+    set(TEST_SRCS
+        tests/test_helpers.cpp
+        tests/test_main.cpp
+        tests/test_valtonenornhag_arxiv_2021.cpp
+    )
+    endif()
     add_executable(tests ${SRCS} ${TEST_SRCS})
     target_include_directories(tests PRIVATE tests)
     target_link_libraries(tests PRIVATE Eigen3::Eigen)
