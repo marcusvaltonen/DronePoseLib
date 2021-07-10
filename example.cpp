@@ -18,15 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <RansacLib/ransac.h>
 #include <Eigen/Dense>
 #include <chrono>  // NOLINT [build/c++11]
 #include <iostream>
+#include <limits>
 #include "get_valtonenornhag_arxiv_2021.hpp"
 #include "relpose.hpp"
+#include "ransac_estimator.hpp"
+#include "ransac_valtonenornhag_arxiv_2021.hpp"
+#include "scene_and_pose_generation.hpp"
+
 
 int main() {
     /* Timing experiments */
-    int nbr_iter = 1e4;
+    int nbr_iter = 1e2;
 
     // Test fEf
     int N = 3;
@@ -95,6 +101,85 @@ int main() {
     std::cout << "Elapsed time (frEfr) fast: "
         << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / nbr_iter
         << " μs" << std::endl;
+
+
+    // Test RANSAC
+    std::cout << "Running RANSAC tests...\n\n";
+
+    Eigen::Matrix<double, 2, Eigen::Dynamic> xx1;
+    Eigen::Matrix<double, 2, Eigen::Dynamic> xx2;
+    DronePoseLib::Camera pose_gt;
+
+    double dist_param = -0.0000001;
+
+    DronePoseLib::ValtonenOrnhagArxiv2021::Solver estimator;
+
+    generate_scene_and_image(100, 2, 10, 70, &pose_gt, &xx1, &xx2, 1.0);
+    add_focal(2000.0, &pose_gt, &xx1);
+    add_focal(2000.0, &pose_gt, &xx2);
+    add_distortion(dist_param, &pose_gt, &xx1);
+    add_distortion(dist_param, &pose_gt, &xx2);
+    add_noise(0.5, &xx1);
+    add_noise(0.5, &xx2);
+
+    // Outliers
+    for (int i = 0; i < 20; ++i) {
+        Eigen::Vector2d n;
+        n.setRandom();
+        n *= 0.2 * pose_gt.focal;
+        xx1.col(i) += n;
+        n.setRandom();
+        n *= 0.2 * pose_gt.focal;
+        xx2.col(i) += n;
+    }
+
+    // We consider the relative pose problem
+    R1.setIdentity();
+    R2 = pose_gt.R;
+
+    // Refinement settings
+    DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver> solver(xx1, xx2, R1, R2, estimator);
+
+    // RANSAC parmeters
+    ransac_lib::LORansacOptions options;
+    options.squared_inlier_threshold_ = 1;
+    options.success_probability_ = 0.9999;
+    options.min_num_iterations_ = 100u;
+    options.max_num_iterations_ = 200u;
+    std::random_device rand_dev;
+    options.random_seed_ = rand_dev();
+
+    ransac_lib::LocallyOptimizedMSAC<
+        DronePoseLib::Camera,
+        std::vector<DronePoseLib::Camera>,
+        DronePoseLib::RansacEstimator<DronePoseLib::ValtonenOrnhagArxiv2021::Solver>
+    > lomsac;
+    ransac_lib::RansacStatistics ransac_stats;
+
+    DronePoseLib::Camera best_model;
+    start = std::chrono::steady_clock::now();
+
+    nbr_iter = 1;
+
+    int num_ransac_inliers;
+    for (int i = 0; i < nbr_iter; i++) {
+        num_ransac_inliers = lomsac.EstimateModel(options, solver, &best_model, &ransac_stats);
+    }
+    end = std::chrono::steady_clock::now();
+
+    std::cout << "Elapsed time (RANSAC frEfr): "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / nbr_iter
+        << " ms" << std::endl;
+
+    std::cout << "   ... LOMSAC found " << num_ransac_inliers
+        << " inliers in " << ransac_stats.num_iterations
+        << " iterations with an inlier ratio of "
+        << ransac_stats.inlier_ratio << std::endl;
+
+    std::cout << "GT\n";
+    debug_print_pose(pose_gt, true);
+    std::cout << "Est\n";
+    debug_print_pose(best_model, true);
 
     return 0;
 }

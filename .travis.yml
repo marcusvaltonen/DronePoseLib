@@ -104,7 +104,22 @@ install:
 
 script:
   - ./build.sh
-  - cpplint --linelength=119 --verbose=1 --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp --exclude=tests/catch2 --exclude=build --exclude=src/helpers/quartic.{h,c}pp --exclude=src/helpers/sturm.h --exclude=src/helpers/charpoly.h --filter=-build/include_subdir --recursive --quiet .
+  - |
+    cpplint \
+    --linelength=119 \
+    --verbose=1 \
+    --exclude=build \
+    --exclude=build_release \
+    --exclude=src/helpers/quartic.{h,c}pp \
+    --exclude=src/helpers/sturm.h \
+    --exclude=src/helpers/charpoly.h \
+    --exclude=src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp \
+    --exclude=tests/catch2 \
+    --exclude=thirdparty \
+    --filter=-build/include_subdir,-runtime/references \
+    --recursive \
+    --quiet .
+
 
 after_success:
   # From: https://github.com/codecov/example-cpp11-cmake/blob/master/.travis.yml

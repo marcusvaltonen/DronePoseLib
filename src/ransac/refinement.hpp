@@ -18,42 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
-#define INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
+#ifndef SRC_RANSAC_REFINEMENT_HPP_
+#define SRC_RANSAC_REFINEMENT_HPP_
 
 #include <Eigen/Dense>
-#include <vector>
+#include "relpose.hpp"
 
 namespace DronePoseLib {
-struct RelPose {
-    Eigen::Matrix3d F;
-    Eigen::Vector3d t;
-    double f;
-    double r;
-};
-struct Camera {
-    Camera() : focal(1.0) {}
-    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans, double f) : R(rot), t(trans), focal(f) {}
-    Camera(Eigen::Matrix3d rot, Eigen::Vector3d trans) : R(rot), t(trans), focal(1.0) {}
-    Eigen::Matrix3d R;
-    Eigen::Vector3d t;
-    double focal;
-    std::vector<double> dist_params;
-};
-struct RefinementSettings {
-    RefinementSettings() :
-        SMALL_NUMBER(1e-8),
-        TOL_CONVERGENCE(1e-10),
-        INITIAL_LM_DAMP(1e-6),
-        MAX_ITER(10),
-        DECREASE_FACTOR(10.0) {}
-    double SMALL_NUMBER;
-    double TOL_CONVERGENCE;
-    double INITIAL_LM_DAMP;
-    int MAX_ITER;
-    double DECREASE_FACTOR;
-};
-
-}  // namespace DronePoseLib
-
-#endif  // INCLUDES_DRONEPOSELIB_RELPOSE_HPP_
+void refinement_undist_with_structure(
+    const Eigen::Matrix<double, 2, Eigen::Dynamic> &x1,
+    const Eigen::Matrix<double, 2, Eigen::Dynamic> &x2,
+    DronePoseLib::Camera &p,
+    Eigen::Matrix<double, 3, Eigen::Dynamic> &X,
+    const DronePoseLib::RefinementSettings &settings
+);
+};  // DronePoseLib
+#endif  // SRC_RANSAC_REFINEMENT_HPP_
