@@ -27,7 +27,7 @@
 #include "ransac_estimator.hpp"
 #include "ransac_valtonenornhag_arxiv_2021.hpp"
 #include "scene_and_pose_generation.hpp"
-#include <iostream>
+
 
 TEST_CASE("RANSAC frEfr - intergration test") {
     Eigen::Matrix3d R1;
@@ -53,8 +53,6 @@ TEST_CASE("RANSAC frEfr - intergration test") {
     add_noise(0.5, &xx2);
 
     debug_print_pose(pose_gt);
-    std::cout << "xx1 =\n" << xx1 << std::endl;
-    std::cout << "xx2 =\n" << xx2 << std::endl;
 
     // Outliers
     for (int i = 0; i < 20; ++i) {
@@ -101,22 +99,20 @@ TEST_CASE("RANSAC frEfr - intergration test") {
     REQUIRE(ransac_stats.number_lo_iterations == 3);
 
     Eigen::Matrix3d R_expected;
-    R_expected <<  0.981849422824209,  0.0209373645070383,  -0.188502885036988,
-                 -0.0436317069416758,   0.992165752088907,  -0.117061498927745,
-                   0.184575147430861,   0.123161467794737,   0.975070903986741;
+    R_expected <<  0.954859221838922,  -0.208314564297171,   0.211775609480524,
+                   0.189925545753350,   0.976276785415069,   0.103980408394627,
+                  -0.228412244723131, -0.0590650536383497,   0.971771148933348;
 
     Eigen::Vector3d t_expected;
-    t_expected << -0.00469216426451916,
-                   0.00937910544565988,
-                   0.00948588308687222;
+    t_expected <<  0.01012099831878770,
+                 -4.69487630234731e-05,
+                   0.00204335953247533;
 
     debug_print_pose(best_model);
 
     REQUIRE(best_model.R.isApprox(R_expected, tol));
     REQUIRE(best_model.t.isApprox(t_expected, tol));
-    REQUIRE(best_model.focal == Approx(2000.561243083627).margin(tol));
-    REQUIRE(best_model.dist_params[0] == Approx(-1.000030345486926e-07).margin(tol));
-    // TMP MOVE
-    REQUIRE(ransac_stats.best_model_score == Approx(20.2130419964).margin(tol));
-    REQUIRE(false);
+    REQUIRE(best_model.focal == Approx(1993.685303806515).margin(tol));
+    REQUIRE(best_model.dist_params[0] == Approx(-1.00907826044204e-07).margin(tol));
+    REQUIRE(ransac_stats.best_model_score == Approx(26.6962845521).margin(tol));
 }
