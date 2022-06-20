@@ -1,0 +1,3 @@
+[submodule "thirdparty/RansacLib"]
+	path = thirdparty/RansacLib
+	url = https://github.com/tsattler/RansacLib.git

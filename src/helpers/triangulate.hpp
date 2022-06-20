@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Marcus Valtonen Örnhag
+// Copyright (c) 2021 Marcus Valtonen Örnhag
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef SRC_HELPERS_RADIAL_HPP_
-#define SRC_HELPERS_RADIAL_HPP_
+#ifndef SRC_HELPERS_TRIANGULATE_HPP_
+#define SRC_HELPERS_TRIANGULATE_HPP_
 
 #include <Eigen/Dense>
+#include "relpose.hpp"
 
 namespace DronePoseLib {
-  Eigen::MatrixXd radialdistort(const Eigen::MatrixXd& x, double kappa);
-  Eigen::MatrixXd radialundistort(const Eigen::MatrixXd& x, double kappa);
+  bool triangulate(const Camera& pose, const Eigen::Vector2d& p1, const Eigen::Vector2d& p2, Eigen::Vector3d *t);
 }
 
-#endif  // SRC_HELPERS_RADIAL_HPP_
+#endif  // SRC_HELPERS_TRIANGULATE_HPP_

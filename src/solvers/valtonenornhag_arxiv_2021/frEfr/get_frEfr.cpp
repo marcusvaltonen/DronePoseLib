@@ -22,8 +22,8 @@
 #include <vector>
 #include <algorithm>
 #include "get_valtonenornhag_arxiv_2021.hpp"
+#include "distortion.hpp"
 #include "normalize2dpts.hpp"
-#include "radial.hpp"
 #include "relpose.hpp"
 #include "solver_frEfr.hpp"
 
@@ -107,6 +107,11 @@ namespace ValtonenOrnhagArxiv2021 {
                 f = sols(0, i).real();
                 r = sols(1, i).real();
 
+                // Discard negative focal length and positive radial distortion coefficient
+                if (f < 0 || r > 0) {
+                    continue;
+                }
+
                 // Extract translation
                 relpose.t = extract_translation(f, r, R1, R2, x1t.leftCols<2>(), x2t.leftCols<2>());
                 relpose.f = f / scale;
@@ -142,8 +147,12 @@ namespace ValtonenOrnhagArxiv2021 {
 
         // Transform points
         Eigen::Matrix<double, 3, 2> y1, y2;
-        y1 = R1.transpose() * Kinv * DronePoseLib::radialundistort(x1, r).colwise().homogeneous();
-        y2 = R2.transpose() * Kinv * DronePoseLib::radialundistort(x2, r).colwise().homogeneous();
+        Eigen::Matrix<double, 2, Eigen::Dynamic> x1u, x2u;
+        DronePoseLib::forward_1param_division_model(r, x1, &x1u);
+        DronePoseLib::forward_1param_division_model(r, x2, &x2u);
+
+        y1 = R1.transpose() * Kinv * x1u.colwise().homogeneous();
+        y2 = R2.transpose() * Kinv * x2u.colwise().homogeneous();
 
         // Extract translation
         Eigen::Vector3d t;

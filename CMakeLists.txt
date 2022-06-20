@@ -13,19 +13,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Eigen3 REQUIRED)
 set(EIGEN_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+include_directories("thirdparty/RansacLib")
 
 include_directories(
     includes/DronePoseLib
     src/helpers
+    src/ransac
     src/solvers/valtonenornhag_arxiv_2021/fEf
     src/solvers/valtonenornhag_arxiv_2021/frEfr
     src/solvers/valtonenornhag_arxiv_2021/rEr
 )
 
 set(SRCS
+    src/helpers/distortion.cpp
     src/helpers/normalize2dpts.cpp
     src/helpers/quartic.cpp
-    src/helpers/radial.cpp
+    src/helpers/scene_and_pose_generation.cpp
+    src/helpers/triangulate.cpp
+    src/ransac/ransac_valtonenornhag_arxiv_2021.cpp
+    src/ransac/refinement.cpp
     src/solvers/valtonenornhag_arxiv_2021/fEf/get_fEf.cpp
     src/solvers/valtonenornhag_arxiv_2021/frEfr/coeffs_frEfr.cpp
     src/solvers/valtonenornhag_arxiv_2021/frEfr/get_frEfr.cpp
@@ -39,10 +45,20 @@ add_executable(example ${SRCS} ${EXAMPLE_SRCS})
 target_link_libraries(example PRIVATE Eigen3::Eigen)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(APPLE)
     set(TEST_SRCS
+        tests/test_helpers.cpp
         tests/test_main.cpp
         tests/test_valtonenornhag_arxiv_2021.cpp
     )
+    else()
+    set(TEST_SRCS
+        tests/test_helpers.cpp
+        tests/test_main.cpp
+        tests/test_ransac.cpp
+        tests/test_valtonenornhag_arxiv_2021.cpp
+    )
+    endif()
     add_executable(tests ${SRCS} ${TEST_SRCS})
     target_include_directories(tests PRIVATE tests)
     target_link_libraries(tests PRIVATE Eigen3::Eigen)
