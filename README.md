@@ -6,16 +6,16 @@
 [![codecov](https://codecov.io/gh/marcusvaltonen/DronePoseLib/branch/main/graph/badge.svg)](https://codecov.io/gh/marcusvaltonen/DronePoseLib)
 
 Library for Visual-Inertial Odometry (VIO) using minimal solvers utilizing a common reference
-direction (obtained from IMU data). The code is related to the ArXiV paper [[link](https://arxiv.org/abs/2103.08286)]:
+direction (obtained from IMU data). The code is related to the CVPR 2022 Workshop paper [[link](https://openaccess.thecvf.com/content/CVPR2022W/WAD/html/Ornhag_Trust_Your_IMU_Consequences_of_Ignoring_the_IMU_Drift_CVPRW_2022_paper.html)]. Please cite the paper below, if you use the code in your work:
 
 ```
-@misc{valtonenornhag-etal-2021-arxiv,
-      title={Trust Your IMU: Consequences of Ignoring the IMU Drift},
-      author={Marcus {Valtonen~Örnhag} and Patrik Persson and Mårten Wadenbäck and Kalle Åström and Anders Heyden},
-      year={2021},
-      eprint={2103.08286},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@InProceedings{Ornhag_2022_CVPR,
+    author    = {\"Ornhag, Marcus Valtonen and Persson, Patrik and Wadenb\"ack, M\r{a}rten and \r{A}str\"om, Kalle and Heyden, Anders},
+    title     = {Trust Your IMU: Consequences of Ignoring the IMU Drift},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
+    month     = {June},
+    year      = {2022},
+    pages     = {4468-4477}
 }
 ```
 
